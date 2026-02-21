@@ -29,7 +29,7 @@ export const ICON_MAP: Record<string, React.ReactNode> = {
     'music': <Music size={20} color="white" />,
 };
 
-const EventCard: FC<EventCardProps> = ({ event, index = 0, hasConflict = false, onToggle, onEdit, onDelete }) => {
+const EventCard: FC<EventCardProps> = ({ event, hasConflict = false, onToggle, onEdit, onDelete }) => {
     const icon = ICON_MAP[event.iconName] || <Check size={20} color="white" />;
 
     return (
