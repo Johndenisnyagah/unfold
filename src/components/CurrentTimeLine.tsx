@@ -37,7 +37,7 @@ const CurrentTimeLine: React.FC<CurrentTimeLineProps> = ({ top }) => {
                 padding: '0 8px',
                 marginLeft: '-12px', // Balanced between original and tight
                 zIndex: 11,
-                backgroundColor: 'var(--bg-black)'
+                backgroundColor: 'transparent'
             }}>
                 {timeString}
             </div>

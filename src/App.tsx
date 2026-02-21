@@ -302,7 +302,7 @@ function App() {
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 2,
-            backgroundColor: 'var(--bg-black)'
+            backgroundColor: 'transparent'
           }}>
             <Sun size={16} style={{ opacity: 0.6 }} />
           </div>
@@ -375,7 +375,7 @@ function App() {
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 2,
-            backgroundColor: 'var(--bg-black)',
+            backgroundColor: 'transparent',
             transition: 'top 0.5s ease'
           }}>
             <Moon size={16} style={{ opacity: 0.6 }} />
