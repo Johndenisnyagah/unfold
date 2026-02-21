@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
-import type { TimelineEvent } from './types';
-import { Dumbbell, Bath, Coffee, Mail, Sun, Moon } from 'lucide-react';
+import type { TimelineEvent, DailyTemplate } from './types';
+import { Sun, Moon, Plus, Trash2, Settings } from 'lucide-react';
 import EventCard from './components/EventCard';
 import CurrentTimeLine from './components/CurrentTimeLine';
+import AddEventModal from './components/AddEventModal';
+import SettingsPanel from './components/SettingsPanel';
+import PillNav from './components/PillNav';
+import CalendarPill from './components/CalendarPill';
+import { loadEvents, saveEvents, loadTemplates, saveTemplates } from './utils/storage';
 
 const initialEvents: TimelineEvent[] = [
   {
@@ -11,7 +16,7 @@ const initialEvents: TimelineEvent[] = [
     startTime: '07:45',
     endTime: '08:15',
     durationMinutes: 30,
-    icon: <Dumbbell size={20} color="white" />,
+    iconName: 'dumbbell',
     color: 'var(--accent-pink)',
     isCompleted: true
   },
@@ -21,7 +26,7 @@ const initialEvents: TimelineEvent[] = [
     startTime: '08:15',
     endTime: '08:30',
     durationMinutes: 15,
-    icon: <Bath size={20} color="white" />,
+    iconName: 'bath',
     color: 'var(--accent-blue)',
     isCompleted: false
   },
@@ -31,7 +36,7 @@ const initialEvents: TimelineEvent[] = [
     startTime: '08:30',
     endTime: '09:00',
     durationMinutes: 30,
-    icon: <Coffee size={20} color="white" />,
+    iconName: 'coffee',
     color: 'var(--accent-orange)',
     isCompleted: false
   },
@@ -41,7 +46,7 @@ const initialEvents: TimelineEvent[] = [
     startTime: '09:00',
     endTime: '09:15',
     durationMinutes: 15,
-    icon: <Mail size={20} color="white" />,
+    iconName: 'mail',
     color: 'var(--accent-purple)',
     isCompleted: false
   }
@@ -52,9 +57,28 @@ const CARD_GAP = 20;
 const START_OFFSET = 40; // Space for the Sun icon
 
 function App() {
-  const [events, setEvents] = useState<TimelineEvent[]>(initialEvents);
+  const [events, setEvents] = useState<TimelineEvent[]>(() => {
+    const saved = loadEvents();
+    return saved || initialEvents;
+  });
+  const [templates, setTemplates] = useState<DailyTemplate[]>(() => {
+    return loadTemplates() || [];
+  });
   const [timeLeft, setTimeLeft] = useState('');
   const [currentTimeTop, setCurrentTimeTop] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<TimelineEvent | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Persistence
+  useEffect(() => {
+    saveEvents(events);
+  }, [events]);
+
+  useEffect(() => {
+    saveTemplates(templates);
+  }, [templates]);
 
   // Helper to convert time string to total minutes
   const timeToMinutes = (timeStr: string) => {
@@ -62,17 +86,20 @@ function App() {
     return h * 60 + m;
   };
 
+  const sortEvents = (evs: TimelineEvent[]) => {
+    return [...evs].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+  };
+
   // The Magic Logic: Non-Linear Mapping
   const getTimeY = (timeStr: string) => {
-    const m = timeToMinutes(timeStr);
+    if (events.length === 0) return START_OFFSET;
 
-    // Sort events by start time just in case
-    const sortedEvents = [...events].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+    const m = timeToMinutes(timeStr);
+    const sortedEvents = sortEvents(events);
 
     // 1. Before first event?
     const firstEventM = timeToMinutes(sortedEvents[0].startTime);
     if (m <= firstEventM) {
-      // Linearly scale before first event (roughly 1px per min)
       return START_OFFSET - (firstEventM - m);
     }
 
@@ -84,13 +111,11 @@ function App() {
       const yStart = i * (CARD_HEIGHT + CARD_GAP) + START_OFFSET;
       const yEnd = yStart + CARD_HEIGHT;
 
-      // During an event?
       if (m >= s && m <= e) {
         const progress = (m - s) / (e - s || 1);
         return yStart + progress * CARD_HEIGHT;
       }
 
-      // Between this event and next?
       if (i < sortedEvents.length - 1) {
         const nextEvent = sortedEvents[i + 1];
         const nextS = timeToMinutes(nextEvent.startTime);
@@ -111,15 +136,11 @@ function App() {
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-
-      // Find the first incomplete event to snap the line to
       const nextEvent = events.find(e => !e.isCompleted);
 
       if (nextEvent) {
-        // Snap to the start of the next incomplete task
         setCurrentTimeTop(getTimeY(nextEvent.startTime));
       } else {
-        // If all done, snap to the Moon icon position
         const lastYEnd = events.length * (CARD_HEIGHT + CARD_GAP) + START_OFFSET;
         setCurrentTimeTop(lastYEnd);
       }
@@ -136,7 +157,7 @@ function App() {
     updateTime();
     const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
-  }, [events]); // Re-calculate if events change
+  }, [events]);
 
   const toggleEvent = (id: string) => {
     setEvents(prev => prev.map(ev =>
@@ -144,23 +165,118 @@ function App() {
     ));
   };
 
+  const handleAddOrUpdateEvent = (event: TimelineEvent) => {
+    setEvents(prev => {
+      const exists = prev.find(e => e.id === event.id);
+      if (exists) {
+        return sortEvents(prev.map(e => e.id === event.id ? event : e));
+      }
+      return sortEvents([...prev, event]);
+    });
+    setEditingEvent(null);
+  };
+
+  const deleteEvent = (id: string) => {
+    if (window.confirm('Delete this event?')) {
+      setEvents(prev => prev.filter(e => e.id !== id));
+    }
+  };
+
+  const startEdit = (event: TimelineEvent) => {
+    setEditingEvent(event);
+    setIsModalOpen(true);
+  };
+
+  const clearEvents = () => {
+    if (window.confirm('Clear all events?')) {
+      setEvents([]);
+    }
+  };
+
+  const handleImportEvents = (newEvents: TimelineEvent[]) => {
+    setEvents(sortEvents(newEvents));
+  };
+
+  const handleSaveTemplate = (name: string) => {
+    const newTemplate: DailyTemplate = {
+      id: Date.now().toString(),
+      name,
+      events: events.map(e => ({
+        title: e.title,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        iconName: e.iconName,
+        color: e.color
+      }))
+    };
+    setTemplates(prev => [...prev, newTemplate]);
+  };
+
+  const handleApplyTemplate = (template: DailyTemplate) => {
+    if (events.length > 0 && !window.confirm('Apply template? This will replace your current timeline.')) {
+      return;
+    }
+
+    const templateEvents: TimelineEvent[] = template.events.map(te => {
+      const [startH, startM] = te.startTime.split(':').map(Number);
+      const [endH, endM] = te.endTime.split(':').map(Number);
+      const duration = (endH * 60 + endM) - (startH * 60 + startM);
+
+      return {
+        ...te,
+        id: Math.random().toString(36).substr(2, 9),
+        durationMinutes: duration > 0 ? duration : 30,
+        isCompleted: false
+      };
+    });
+
+    setEvents(sortEvents(templateEvents));
+    setIsSettingsOpen(false);
+  };
+
+  const handleDeleteTemplate = (id: string) => {
+    if (window.confirm('Delete this template?')) {
+      setTemplates(prev => prev.filter(t => t.id !== id));
+    }
+  };
+
+  const checkConflict = (event: TimelineEvent, allEvents: TimelineEvent[]) => {
+    const start = timeToMinutes(event.startTime);
+    const end = timeToMinutes(event.endTime);
+
+    return allEvents.some(other => {
+      if (other.id === event.id) return false;
+      const otherStart = timeToMinutes(other.startTime);
+      const otherEnd = timeToMinutes(other.endTime);
+      // Check for overlap: (StartA < EndB) and (EndA > StartB)
+      return start < otherEnd && end > otherStart;
+    });
+  };
+
   return (
     <div className="app-container" style={{
-      padding: '40px 20px',
+      padding: '40px 16px', // Balanced padding
       minHeight: '100vh',
       position: 'relative',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      gap: '24px'
     }}>
+      {/* Top Calendar Navigation */}
+      <CalendarPill
+        selectedDate={selectedDate}
+        onDateSelect={setSelectedDate}
+      />
+
       {/* Timeline Column */}
-      <div style={{ position: 'relative', flexGrow: 1, marginLeft: '20px' }}>
+      <div style={{ position: 'relative', flexGrow: 1, marginLeft: '40px' }}> {/* Balanced margin */}
 
         {/* Top Sun Icon */}
         <div style={{
           position: 'absolute',
-          left: '40px',
+          left: '24px', // Shifted right to clear hour markers
           top: `${START_OFFSET - 40}px`,
-          width: '40px',
+          width: '24px',
           height: '40px',
           display: 'flex',
           alignItems: 'center',
@@ -168,15 +284,15 @@ function App() {
           zIndex: 2,
           backgroundColor: 'var(--bg-black)'
         }}>
-          <Sun size={18} style={{ opacity: 0.6 }} />
+          <Sun size={16} style={{ opacity: 0.6 }} />
         </div>
 
-        {/* Vertical Spine (Connected from Sun to Moon) */}
+        {/* Vertical Spine */}
         <div style={{
           position: 'absolute',
-          left: '60px',
+          left: '36px', // Shifted right to clear hour markers
           top: '0px',
-          bottom: '-20px', // Spans through the Moon icon
+          bottom: '-20px',
           width: '2px',
           backgroundColor: 'var(--spine-gray)',
           zIndex: 0
@@ -185,44 +301,55 @@ function App() {
         {/* Current Time Line */}
         <CurrentTimeLine top={currentTimeTop} />
 
-        {/* Dynamic Hour Markers (Only for hours with events and within bounds) */}
+        {/* Dynamic Hour Markers */}
         {Array.from(new Set(events.map(e => parseInt(e.startTime.split(':')[0])))).sort((a, b) => a - b).map(hour => {
           const y = getTimeY(`${String(hour).padStart(2, '0')}:00`);
-          if (y < START_OFFSET) return null; // Hide if above the Sun icon
+          if (y < START_OFFSET) return null;
           return (
             <div key={hour} style={{
               position: 'absolute',
-              left: '10px',
+              left: '-32px', // Brought back into visible bounds (Absolute 8px)
               top: `${y}px`,
               color: 'var(--text-secondary)',
               fontWeight: 'bold',
-              fontSize: '24px',
+              fontSize: '38px', // Slightly taller for prominence
+              opacity: 0.35,
               transform: 'translateY(-50%)',
-              transition: 'top 0.5s ease'
+              transition: 'top 0.5s ease',
+              letterSpacing: '-0.02em',
+              zIndex: 1
             }}>
               {String(hour).padStart(2, '0')}
             </div>
           );
         })}
 
-        {/* Events Stack (Linear Flow) */}
+        {/* Events Stack */}
         <div className="events-list" style={{
           paddingTop: `${START_OFFSET}px`,
           display: 'flex',
           flexDirection: 'column',
           gap: `${CARD_GAP}px`
         }}>
-          {events.map(event => (
-            <EventCard key={event.id} event={event} onToggle={toggleEvent} />
+          {events.map((event, index) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              index={index}
+              hasConflict={checkConflict(event, events)}
+              onToggle={toggleEvent}
+              onDelete={deleteEvent}
+              onEdit={startEdit}
+            />
           ))}
         </div>
 
-        {/* Bottom Moon Icon (Now relative to cards) */}
+        {/* Bottom Moon Icon */}
         <div style={{
           position: 'absolute',
-          left: '40px',
+          left: '24px', // Match Sun alignment
           top: `${events.length * (CARD_HEIGHT + CARD_GAP) + START_OFFSET}px`,
-          width: '40px',
+          width: '24px',
           height: '40px',
           display: 'flex',
           alignItems: 'center',
@@ -231,7 +358,7 @@ function App() {
           backgroundColor: 'var(--bg-black)',
           transition: 'top 0.5s ease'
         }}>
-          <Moon size={18} style={{ opacity: 0.6 }} />
+          <Moon size={16} style={{ opacity: 0.6 }} />
         </div>
 
       </div>
@@ -242,25 +369,62 @@ function App() {
         marginTop: '60px',
         color: 'var(--text-secondary)',
         fontSize: '15px',
-        paddingBottom: '80px'
+        paddingBottom: '120px', // Extra padding for the floating bar
       }}>
         <p>End of day: {timeLeft}</p>
-        <button style={{
-          marginTop: '16px',
-          backgroundColor: '#2c2c2e',
-          color: 'white',
-          border: 'none',
-          padding: '10px 16px',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '16px',
-          cursor: 'pointer'
-        }}>
-          <span style={{ fontSize: '18px' }}>+</span> Create event
-        </button>
       </div>
+
+      {/* Animated Pill Nav Bar */}
+      <div style={{
+        position: 'fixed',
+        bottom: '24px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 'calc(100% - 40px)', // Full width minus page padding
+        maxWidth: '380px',
+        zIndex: 100,
+      }}>
+        <PillNav items={[
+          {
+            id: 'create',
+            label: 'Create event',
+            icon: Plus,
+            onClick: () => { setEditingEvent(null); setIsModalOpen(true); }
+          },
+          {
+            id: 'clear',
+            label: 'Clear',
+            icon: Trash2,
+            onClick: clearEvents,
+            destructive: true
+          },
+          {
+            id: 'settings',
+            label: 'Settings',
+            icon: Settings,
+            onClick: () => setIsSettingsOpen(true)
+          }
+        ]} />
+      </div>
+
+      <AddEventModal
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
+        onAdd={handleAddOrUpdateEvent}
+        eventToEdit={editingEvent}
+      />
+
+      <SettingsPanel
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        events={events}
+        onImport={handleImportEvents}
+        onClear={() => setEvents([])}
+        templates={templates}
+        onSaveTemplate={handleSaveTemplate}
+        onApplyTemplate={handleApplyTemplate}
+        onDeleteTemplate={handleDeleteTemplate}
+      />
     </div>
   );
 }

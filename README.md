@@ -1,30 +1,48 @@
 # Unfold
 
-A high-fidelity, personal daily timeline application optimized for the iPhone 12 Pro Max. This app features a premium dark aesthetic with a unique "Liquid Timeline" that prioritizes visual uniformity and clarity.
+A high-fidelity, personal daily timeline application with a premium dark aesthetic and a unique "Liquid Timeline" that prioritizes visual uniformity and clarity. Installable as a PWA for a native-app feel.
 
-## What We've Built
+## Features
 
-- **Premium Dark UI**: A sleek, high-end interface with custom accent colors.
-- **Liquid Timeline**: A non-linear mapping system that ensures even spacing between activity cards while maintaining mathematical time accuracy.
-- **Smart Snapping**: A dynamic red indicator that automatically snaps to the start of your next pending activity.
-- **Uniform Card Design**: Standardized card sizes (120px) for a consistent, rhythmic vertical flow.
-- **Filtered Hour Markers**: Only displays hour labels for hours that contain scheduled events, keeping the interface clean and focused.
-- **End-of-Day Countdown**: A live real-time countdown to the end of your day.
+### Core
+- **Liquid Timeline**: Non-linear mapping for even card spacing with mathematical time accuracy.
+- **Smart Snapping**: A dynamic red indicator that snaps to your next pending activity.
+- **End-of-Day Countdown**: Live real-time countdown to the end of your scheduled day.
+- **Conflict Detection**: Visual warnings when tasks overlap in time.
+
+### Task Management
+- **Create, Edit & Delete**: Full CRUD for timeline events with custom icons and colors.
+- **Daily Templates**: Save and apply reusable routines (Morning, Work Day, etc.).
+- **Export / Import**: JSON-based data portability for backup and restore.
+- **Recurring Tasks**: Tag tasks as daily or weekly repeating.
+
+### Navigation & UI
+- **Fluid Calendar**: Horizontally scrollable date picker with smooth auto-centering and a "Today" indicator.
+- **Glassmorphic Design**: Premium frosted-glass navigation bars with balanced symmetry.
+- **Staggered Animations**: Cards animate in on scroll with blur and slide transitions — replays on every scroll.
+- **Mobile Optimized**: Compressed timeline gutter for maximum card width on smaller screens.
+
+### Platform
+- **PWA Support**: Installable on mobile and desktop with offline caching via Service Worker.
+- **Responsive**: Optimized for mobile (iPhone 12 Pro Max) and desktop viewports.
 
 ## Tech Stack
 
-- **React**: Core UI framework.
-- **TypeScript**: For robust, type-safe code.
-- **Vite**: Ultra-fast development server and build tool.
-- **Lucide React**: 🏷️ [lucide.dev](https://lucide.dev/) - Modern, professional icons used throughout the app.
-- **Vanilla CSS**: Custom design system and layout logic.
+- **React** + **TypeScript** — Core UI with type safety.
+- **Vite** — Ultra-fast dev server and build tool.
+- **Framer Motion** — Fluid animations and micro-interactions.
+- **Lucide React** — Modern, professional icons.
+- **LocalStorage** — Client-side persistence with encryption.
 
 ## Getting Started
 
-1. Install dependencies: `npm install`
-2. Run development server: `npm run dev`
-3. View the app: Open the provided local URL in your browser (simulate iPhone 12 Pro Max for the best experience).
+```bash
+npm install
+npm run dev
+```
+
+Open the provided local URL in your browser.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](file:///c:/Users/johnd/Documents/portfolio%20projects/my_time_line/LICENSE) file for details.
+MIT License — see the [LICENSE](LICENSE) file for details.
