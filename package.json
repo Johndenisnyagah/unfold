@@ -1,1 +1,1 @@
-{"name": "unfold", "version": "1.0.0", "scripts": {}, "dependencies": {}, "devDependencies": {"eslint-plugin-react-hooks": "^8.1.0"}}
+{\n  "name": "unfold",\n  "version": "1.0.0",\n  "dependencies": {},\n  "devDependencies": {\n    "eslint-plugin-react-hooks": "^4.6.0"\n  }\n}
