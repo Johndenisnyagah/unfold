@@ -5,7 +5,6 @@ import type { TimelineEvent } from '../types';
 
 interface EventCardProps {
     event: TimelineEvent;
-    index?: number;
     hasConflict?: boolean;
     onToggle?: (id: string) => void;
     onEdit?: (event: TimelineEvent) => void;

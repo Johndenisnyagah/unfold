@@ -353,11 +353,10 @@ function App() {
             flexDirection: 'column',
             gap: `${CARD_GAP}px`
           }}>
-            {events.map((event, index) => (
+            {events.map((event) => (
               <EventCard
                 key={event.id}
                 event={event}
-                index={index}
                 hasConflict={checkConflict(event, events)}
                 onToggle={toggleEvent}
                 onDelete={deleteEvent}
