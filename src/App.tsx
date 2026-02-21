@@ -7,6 +7,7 @@ import AddEventModal from './components/AddEventModal';
 import SettingsPanel from './components/SettingsPanel';
 import PillNav from './components/PillNav';
 import CalendarPill from './components/CalendarPill';
+import Silk from './components/Silk';
 import { loadEvents, saveEvents, loadTemplates, saveTemplates } from './utils/storage';
 
 const initialEvents: TimelineEvent[] = [
@@ -254,179 +255,200 @@ function App() {
   };
 
   return (
-    <div className="app-container" style={{
-      padding: '40px 16px', // Balanced padding
-      minHeight: '100vh',
-      position: 'relative',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '24px'
-    }}>
-      {/* Top Calendar Navigation */}
-      <CalendarPill
-        selectedDate={selectedDate}
-        onDateSelect={setSelectedDate}
-      />
-
-      {/* Timeline Column */}
-      <div style={{ position: 'relative', flexGrow: 1, marginLeft: '40px' }}> {/* Balanced margin */}
-
-        {/* Top Sun Icon */}
-        <div style={{
-          position: 'absolute',
-          left: '24px', // Shifted right to clear hour markers
-          top: `${START_OFFSET - 40}px`,
-          width: '24px',
-          height: '40px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 2,
-          backgroundColor: 'var(--bg-black)'
-        }}>
-          <Sun size={16} style={{ opacity: 0.6 }} />
-        </div>
-
-        {/* Vertical Spine */}
-        <div style={{
-          position: 'absolute',
-          left: '36px', // Shifted right to clear hour markers
-          top: '0px',
-          bottom: '-20px',
-          width: '2px',
-          backgroundColor: 'var(--spine-gray)',
-          zIndex: 0
-        }}></div>
-
-        {/* Current Time Line */}
-        <CurrentTimeLine top={currentTimeTop} />
-
-        {/* Dynamic Hour Markers */}
-        {Array.from(new Set(events.map(e => parseInt(e.startTime.split(':')[0])))).sort((a, b) => a - b).map(hour => {
-          const y = getTimeY(`${String(hour).padStart(2, '0')}:00`);
-          if (y < START_OFFSET) return null;
-          return (
-            <div key={hour} style={{
-              position: 'absolute',
-              left: '-32px', // Brought back into visible bounds (Absolute 8px)
-              top: `${y}px`,
-              color: 'var(--text-secondary)',
-              fontWeight: 'bold',
-              fontSize: '38px', // Slightly taller for prominence
-              opacity: 0.35,
-              transform: 'translateY(-50%)',
-              transition: 'top 0.5s ease',
-              letterSpacing: '-0.02em',
-              zIndex: 1
-            }}>
-              {String(hour).padStart(2, '0')}
-            </div>
-          );
-        })}
-
-        {/* Events Stack */}
-        <div className="events-list" style={{
-          paddingTop: `${START_OFFSET}px`,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: `${CARD_GAP}px`
-        }}>
-          {events.map((event, index) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              index={index}
-              hasConflict={checkConflict(event, events)}
-              onToggle={toggleEvent}
-              onDelete={deleteEvent}
-              onEdit={startEdit}
-            />
-          ))}
-        </div>
-
-        {/* Bottom Moon Icon */}
-        <div style={{
-          position: 'absolute',
-          left: '24px', // Match Sun alignment
-          top: `${events.length * (CARD_HEIGHT + CARD_GAP) + START_OFFSET}px`,
-          width: '24px',
-          height: '40px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 2,
-          backgroundColor: 'var(--bg-black)',
-          transition: 'top 0.5s ease'
-        }}>
-          <Moon size={16} style={{ opacity: 0.6 }} />
-        </div>
-
-      </div>
-
-      {/* Footer Info */}
-      <div style={{
-        marginLeft: '100px',
-        marginTop: '60px',
-        color: 'var(--text-secondary)',
-        fontSize: '15px',
-        paddingBottom: '120px', // Extra padding for the floating bar
-      }}>
-        <p>End of day: {timeLeft}</p>
-      </div>
-
-      {/* Animated Pill Nav Bar */}
+    <>
+      {/* Animated Silk Background */}
       <div style={{
         position: 'fixed',
-        bottom: '24px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: 'calc(100% - 40px)', // Full width minus page padding
-        maxWidth: '380px',
-        zIndex: 100,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: -1
       }}>
-        <PillNav items={[
-          {
-            id: 'create',
-            label: 'Create event',
-            icon: Plus,
-            onClick: () => { setEditingEvent(null); setIsModalOpen(true); }
-          },
-          {
-            id: 'clear',
-            label: 'Clear',
-            icon: Trash2,
-            onClick: clearEvents,
-            destructive: true
-          },
-          {
-            id: 'settings',
-            label: 'Settings',
-            icon: Settings,
-            onClick: () => setIsSettingsOpen(true)
-          }
-        ]} />
+        <Silk
+          speed={3}
+          scale={1}
+          color="#2d2b55"
+          noiseIntensity={1.2}
+          rotation={0}
+        />
       </div>
 
-      <AddEventModal
-        isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
-        onAdd={handleAddOrUpdateEvent}
-        eventToEdit={editingEvent}
-      />
+      <div className="app-container" style={{
+        padding: '40px 16px',
+        minHeight: '100vh',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px'
+      }}>
+        {/* Top Calendar Navigation */}
+        <CalendarPill
+          selectedDate={selectedDate}
+          onDateSelect={setSelectedDate}
+        />
 
-      <SettingsPanel
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        events={events}
-        onImport={handleImportEvents}
-        onClear={() => setEvents([])}
-        templates={templates}
-        onSaveTemplate={handleSaveTemplate}
-        onApplyTemplate={handleApplyTemplate}
-        onDeleteTemplate={handleDeleteTemplate}
-      />
-    </div>
+        {/* Timeline Column */}
+        <div style={{ position: 'relative', flexGrow: 1, marginLeft: '40px' }}> {/* Balanced margin */}
+
+          {/* Top Sun Icon */}
+          <div style={{
+            position: 'absolute',
+            left: '24px', // Shifted right to clear hour markers
+            top: `${START_OFFSET - 40}px`,
+            width: '24px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2,
+            backgroundColor: 'var(--bg-black)'
+          }}>
+            <Sun size={16} style={{ opacity: 0.6 }} />
+          </div>
+
+          {/* Vertical Spine */}
+          <div style={{
+            position: 'absolute',
+            left: '36px', // Shifted right to clear hour markers
+            top: '0px',
+            bottom: '-20px',
+            width: '2px',
+            backgroundColor: 'var(--spine-gray)',
+            zIndex: 0
+          }}></div>
+
+          {/* Current Time Line */}
+          <CurrentTimeLine top={currentTimeTop} />
+
+          {/* Dynamic Hour Markers */}
+          {Array.from(new Set(events.map(e => parseInt(e.startTime.split(':')[0])))).sort((a, b) => a - b).map(hour => {
+            const y = getTimeY(`${String(hour).padStart(2, '0')}:00`);
+            if (y < START_OFFSET) return null;
+            return (
+              <div key={hour} style={{
+                position: 'absolute',
+                left: '-32px', // Brought back into visible bounds (Absolute 8px)
+                top: `${y}px`,
+                color: 'var(--text-secondary)',
+                fontWeight: 'bold',
+                fontSize: '38px', // Slightly taller for prominence
+                opacity: 0.35,
+                transform: 'translateY(-50%)',
+                transition: 'top 0.5s ease',
+                letterSpacing: '-0.02em',
+                zIndex: 1
+              }}>
+                {String(hour).padStart(2, '0')}
+              </div>
+            );
+          })}
+
+          {/* Events Stack */}
+          <div className="events-list" style={{
+            paddingTop: `${START_OFFSET}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${CARD_GAP}px`
+          }}>
+            {events.map((event, index) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                index={index}
+                hasConflict={checkConflict(event, events)}
+                onToggle={toggleEvent}
+                onDelete={deleteEvent}
+                onEdit={startEdit}
+              />
+            ))}
+          </div>
+
+          {/* Bottom Moon Icon */}
+          <div style={{
+            position: 'absolute',
+            left: '24px', // Match Sun alignment
+            top: `${events.length * (CARD_HEIGHT + CARD_GAP) + START_OFFSET}px`,
+            width: '24px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2,
+            backgroundColor: 'var(--bg-black)',
+            transition: 'top 0.5s ease'
+          }}>
+            <Moon size={16} style={{ opacity: 0.6 }} />
+          </div>
+
+        </div>
+
+        {/* Footer Info */}
+        <div style={{
+          marginLeft: '100px',
+          marginTop: '60px',
+          color: 'var(--text-secondary)',
+          fontSize: '15px',
+          paddingBottom: '120px', // Extra padding for the floating bar
+        }}>
+          <p>End of day: {timeLeft}</p>
+        </div>
+
+        {/* Animated Pill Nav Bar */}
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 'calc(100% - 40px)', // Full width minus page padding
+          maxWidth: '380px',
+          zIndex: 100,
+        }}>
+          <PillNav items={[
+            {
+              id: 'create',
+              label: 'Create event',
+              icon: Plus,
+              onClick: () => { setEditingEvent(null); setIsModalOpen(true); }
+            },
+            {
+              id: 'clear',
+              label: 'Clear',
+              icon: Trash2,
+              onClick: clearEvents,
+              destructive: true
+            },
+            {
+              id: 'settings',
+              label: 'Settings',
+              icon: Settings,
+              onClick: () => setIsSettingsOpen(true)
+            }
+          ]} />
+        </div>
+
+        <AddEventModal
+          isOpen={isModalOpen}
+          onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
+          onAdd={handleAddOrUpdateEvent}
+          eventToEdit={editingEvent}
+        />
+
+        <SettingsPanel
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          events={events}
+          onImport={handleImportEvents}
+          onClear={() => setEvents([])}
+          templates={templates}
+          onSaveTemplate={handleSaveTemplate}
+          onApplyTemplate={handleApplyTemplate}
+          onDeleteTemplate={handleDeleteTemplate}
+        />
+      </div>
+    </>
   );
 }
 
 export default App;
+

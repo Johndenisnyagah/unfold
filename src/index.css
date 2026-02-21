@@ -19,7 +19,7 @@
 
   color-scheme: dark;
   color: var(--text-primary);
-  background-color: var(--bg-black);
+  background-color: transparent; /* Let Silk background show through */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -37,7 +37,7 @@ body {
   min-height: 100vh;
   width: 100vw;
   overflow-x: hidden;
-  background-color: var(--bg-black);
+  background-color: transparent; /* Let Silk background show through */
 }
 
 #root {
