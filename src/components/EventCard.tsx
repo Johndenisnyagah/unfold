@@ -36,10 +36,9 @@ const EventCard: FC<EventCardProps> = ({ event, index = 0, hasConflict = false, 
         <motion.div
             initial={{ opacity: 0, x: -30, filter: 'blur(10px)' }}
             whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: false, amount: 0.1 }}
             transition={{
-                duration: 0.8,
-                delay: index * 0.1,
+                duration: 0.7,
                 ease: [0.21, 0.47, 0.32, 0.98]
             }}
             className="event-card-container"

@@ -263,7 +263,8 @@ function App() {
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: -1
+        zIndex: -1,
+        pointerEvents: 'none'
       }}>
         <Silk
           speed={3}
@@ -278,6 +279,7 @@ function App() {
         padding: '40px 16px',
         minHeight: '100vh',
         position: 'relative',
+        zIndex: 1,
         display: 'flex',
         flexDirection: 'column',
         gap: '24px'

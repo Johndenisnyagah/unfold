@@ -8,6 +8,7 @@ interface CalendarPillProps {
 
 const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const today = new Date();
 
     // Generate 30 days (14 before today, today, 15 after today)
@@ -28,58 +29,70 @@ const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect 
     // Auto-center the selected date
     useEffect(() => {
         const centerDate = (behavior: ScrollBehavior = 'smooth') => {
-            if (scrollRef.current) {
-                const container = scrollRef.current;
-                const activeItem = container.querySelector('[data-active="true"]') as HTMLElement;
+            if (scrollRef.current && containerRef.current) {
+                const scrollArea = scrollRef.current;
+                const pill = containerRef.current;
+                const activeItem = scrollArea.querySelector('[data-active="true"]') as HTMLElement;
+
                 if (activeItem) {
-                    const scrollLeft = activeItem.offsetLeft - container.offsetWidth / 2 + activeItem.offsetWidth / 2;
-                    container.scrollTo({ left: scrollLeft, behavior });
+                    // Calculate center relative to the entire PILL, not just the scroll div
+                    // This ensures the active date is in the visual center of the component
+                    const itemCenter = activeItem.offsetLeft + activeItem.offsetWidth / 2;
+                    const pillCenter = pill.offsetWidth / 2;
+
+                    // We need to account for the fact that scrollRef might be offset by the Month label
+                    const scrollAreaOffset = scrollArea.offsetLeft;
+
+                    const scrollLeft = itemCenter - (pillCenter - scrollAreaOffset);
+                    scrollArea.scrollTo({ left: scrollLeft, behavior });
                 }
             }
         };
 
-        // Initial mount: use 'auto' for instant centering
         if (isFirstRender.current) {
             centerDate('auto');
-            // Small delay to ensure layout has settled on mount
             const timer = setTimeout(() => centerDate('auto'), 50);
             isFirstRender.current = false;
             return () => clearTimeout(timer);
         } else {
-            // Subsequent changes: use 'smooth'
             centerDate('smooth');
         }
     }, [selectedDate]);
 
-    const monthName = selectedDate.toLocaleDateString('en-US', { month: 'long' }).toUpperCase();
+    const monthName = selectedDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
 
     return (
-        <div style={{
-            backgroundColor: 'rgba(28, 28, 30, 0.7)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            padding: '8px 12px',
-            borderRadius: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            width: '100%',
-            maxWidth: '380px',
-            margin: '0 auto',
-            overflow: 'hidden'
-        }}>
-            {/* Desktop Label: Month Name */}
+        <div
+            ref={containerRef}
+            style={{
+                backgroundColor: 'rgba(28, 28, 30, 0.7)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                padding: '8px 12px',
+                borderRadius: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                width: '100%',
+                maxWidth: '380px',
+                margin: '0 auto',
+                overflow: 'hidden',
+                position: 'relative'
+            }}
+        >
+            {/* Elegant Side Label: Month Name */}
             <div style={{
-                color: 'white',
-                fontSize: '11px',
-                fontWeight: '800',
-                padding: '0 12px',
-                letterSpacing: '0.15em',
-                display: 'none',
-                whiteSpace: 'nowrap'
-            }} className="desktop-only">
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '10px',
+                fontWeight: '900',
+                padding: '0 10px 0 6px',
+                letterSpacing: '0.1em',
+                borderRight: '1px solid rgba(255,255,255,0.1)',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+            }}>
                 {monthName}
             </div>
 
@@ -195,11 +208,8 @@ const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect 
                 .hide-scrollbar::-webkit-scrollbar {
                     display: none;
                 }
-                @media (min-width: 400px) {
-                    .desktop-only { display: block !important; }
-                }
             `}</style>
-        </div>
+        </div >
     );
 };
 
