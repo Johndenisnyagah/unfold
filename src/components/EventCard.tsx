@@ -1,6 +1,6 @@
-import React, { type FC } from 'react';
+import { type FC } from 'react';
 import { motion } from 'framer-motion';
-import { Dumbbell, Bath, Coffee, Mail, Star, Book, Heart, Trash2, Utensils, Laptop, Car, Smartphone, GlassWater, Users, Music, Check, AlertCircle } from 'lucide-react';
+import { Trash2, Check, AlertCircle } from 'lucide-react';
 import type { TimelineEvent } from '../types';
 
 interface EventCardProps {
@@ -11,22 +11,7 @@ interface EventCardProps {
     onDelete?: (id: string) => void;
 }
 
-export const ICON_MAP: Record<string, React.ReactNode> = {
-    'dumbbell': <Dumbbell size={20} color="white" />,
-    'bath': <Bath size={20} color="white" />,
-    'coffee': <Coffee size={20} color="white" />,
-    'mail': <Mail size={20} color="white" />,
-    'star': <Star size={20} color="white" />,
-    'book': <Book size={20} color="white" />,
-    'heart': <Heart size={20} color="white" />,
-    'utensils': <Utensils size={20} color="white" />,
-    'laptop': <Laptop size={20} color="white" />,
-    'car': <Car size={20} color="white" />,
-    'smartphone': <Smartphone size={20} color="white" />,
-    'glass-water': <GlassWater size={20} color="white" />,
-    'users': <Users size={20} color="white" />,
-    'music': <Music size={20} color="white" />,
-};
+import { ICON_MAP } from '../utils/icons';
 
 const EventCard: FC<EventCardProps> = ({ event, hasConflict = false, onToggle, onEdit, onDelete }) => {
     const icon = ICON_MAP[event.iconName] || <Check size={20} color="white" />;

@@ -57,7 +57,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 } else {
                     alert('Invalid file format. Please upload a valid Unfold backup.');
                 }
-            } catch (err) {
+            } catch {
                 alert('Error parsing file. Please ensure it is a valid JSON.');
             }
         };

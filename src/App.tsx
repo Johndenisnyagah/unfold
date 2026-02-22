@@ -9,52 +9,7 @@ import PillNav from './components/PillNav';
 import CalendarPill from './components/CalendarPill';
 import { loadEvents, saveEvents, loadTemplates, saveTemplates } from './utils/storage';
 
-const initialEvents: TimelineEvent[] = [
-  {
-    id: '1',
-    title: 'Morning Workout',
-    startTime: '07:45',
-    endTime: '08:15',
-    durationMinutes: 30,
-    iconName: 'dumbbell',
-    color: 'var(--accent-pink)',
-    isCompleted: true
-  },
-  {
-    id: '2',
-    title: 'Shower',
-    startTime: '08:15',
-    endTime: '08:30',
-    durationMinutes: 15,
-    iconName: 'bath',
-    color: 'var(--accent-blue)',
-    isCompleted: false
-  },
-  {
-    id: '3',
-    title: 'Breakfast',
-    startTime: '08:30',
-    endTime: '09:00',
-    durationMinutes: 30,
-    iconName: 'coffee',
-    color: 'var(--accent-orange)',
-    isCompleted: false
-  },
-  {
-    id: '4',
-    title: 'Check Email',
-    startTime: '09:00',
-    endTime: '09:15',
-    durationMinutes: 15,
-    iconName: 'mail',
-    color: 'var(--accent-purple)',
-    isCompleted: false
-  }
-];
-
-const CARD_HEIGHT = 120;
-const CARD_GAP = 20;
-const START_OFFSET = 40; // Space for the Sun icon
+import { initialEvents, CARD_HEIGHT, CARD_GAP, START_OFFSET } from './constants';
 
 function App() {
   const [events, setEvents] = useState<TimelineEvent[]>(() => {

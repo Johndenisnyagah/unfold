@@ -1,7 +1,7 @@
 import React, { useState, useEffect, type FC } from 'react';
 import { X, Check } from 'lucide-react';
 import type { TimelineEvent } from '../types';
-import { ICON_MAP } from './EventCard';
+import { ICON_MAP } from '../utils/icons';
 
 interface AddEventModalProps {
     isOpen: boolean;
@@ -200,7 +200,7 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                         transition: 'all 0.2s',
                                     }}
                                 >
-                                    {React.cloneElement(ICON_MAP[icon] as React.ReactElement, { size: 20 } as any)}
+                                    {React.cloneElement(ICON_MAP[icon] as React.ReactElement<{ size: number }>, { size: 20 })}
                                 </button>
                             ))}
                         </div>
