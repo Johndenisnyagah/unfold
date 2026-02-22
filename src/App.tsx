@@ -37,8 +37,9 @@ function App() {
 
   // Helper to convert time string to total minutes
   const timeToMinutes = (timeStr: string) => {
+    if (!timeStr || typeof timeStr !== 'string' || !timeStr.includes(':')) return 0;
     const [h, m] = timeStr.split(':').map(Number);
-    return h * 60 + m;
+    return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
   };
 
   const sortEvents = (evs: TimelineEvent[]) => {
@@ -46,16 +47,17 @@ function App() {
   };
 
   // The Magic Logic: Non-Linear Mapping
-  const getTimeY = (timeStr: string) => {
-    if (events.length === 0) return START_OFFSET;
+  const getTimeY = (timeStr: string | undefined): number => {
+    if (events.length === 0 || !timeStr) return START_OFFSET;
 
     const m = timeToMinutes(timeStr);
     const sortedEvents = sortEvents(events);
 
     // 1. Before first event?
-    const firstEventM = timeToMinutes(sortedEvents[0].startTime);
-    if (m <= firstEventM) {
-      return START_OFFSET - (firstEventM - m);
+    const firstEvent = sortedEvents[0];
+    const firstS = timeToMinutes(firstEvent.startTime);
+    if (m <= firstS) {
+      return START_OFFSET - (firstS - m);
     }
 
     // 2. Iterate through events and gaps
@@ -389,4 +391,3 @@ function App() {
 }
 
 export default App;
-
