@@ -27,7 +27,8 @@ const CurrentTimeLine: React.FC<CurrentTimeLineProps> = ({ top }) => {
                 display: 'flex',
                 alignItems: 'center',
                 zIndex: 10,
-                pointerEvents: 'none'
+                pointerEvents: 'none',
+                transform: 'translateY(-50%)'
             }}
         >
             <div style={{

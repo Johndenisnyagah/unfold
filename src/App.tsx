@@ -7,7 +7,6 @@ import AddEventModal from './components/AddEventModal';
 import SettingsPanel from './components/SettingsPanel';
 import PillNav from './components/PillNav';
 import CalendarPill from './components/CalendarPill';
-import Silk from './components/Silk';
 import { loadEvents, saveEvents, loadTemplates, saveTemplates } from './utils/storage';
 
 const initialEvents: TimelineEvent[] = [
@@ -140,10 +139,12 @@ function App() {
       const nextEvent = events.find(e => !e.isCompleted);
 
       if (nextEvent) {
-        setCurrentTimeTop(getTimeY(nextEvent.startTime));
+        // Offset by half the gap to center the line between cards
+        setCurrentTimeTop(getTimeY(nextEvent.startTime) - CARD_GAP / 2);
       } else {
+        // Offset by half the gap to center the line after the last card
         const lastYEnd = events.length * (CARD_HEIGHT + CARD_GAP) + START_OFFSET;
-        setCurrentTimeTop(lastYEnd);
+        setCurrentTimeTop(lastYEnd - CARD_GAP / 2);
       }
 
       const target = new Date();
@@ -256,25 +257,6 @@ function App() {
 
   return (
     <>
-      {/* Animated Silk Background */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: -1,
-        pointerEvents: 'none'
-      }}>
-        <Silk
-          speed={3}
-          scale={1}
-          color="#2d2b55"
-          noiseIntensity={1.2}
-          rotation={0}
-        />
-      </div>
-
       <div className="app-container" style={{
         padding: '40px 16px',
         minHeight: '100vh',
