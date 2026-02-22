@@ -18,7 +18,7 @@ export const loadEvents = (): TimelineEvent[] | null => {
         if (serializedEvents === null) return null;
 
         const events = JSON.parse(serializedEvents);
-        return events;
+        return Array.isArray(events) ? events : null;
     } catch (err) {
         console.error('Could not load events', err);
         return null;
@@ -36,7 +36,9 @@ export const saveTemplates = (templates: DailyTemplate[]) => {
 export const loadTemplates = (): DailyTemplate[] | null => {
     try {
         const serialized = localStorage.getItem(TEMPLATE_KEY);
-        return serialized ? JSON.parse(serialized) : null;
+        if (!serialized) return null;
+        const templates = JSON.parse(serialized);
+        return Array.isArray(templates) ? templates : null;
     } catch (err) {
         console.error('Could not load templates', err);
         return null;
