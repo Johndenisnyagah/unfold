@@ -1,23 +1,13 @@
-const CACHE_NAME = 'unfold-cache-v1';
-const ASSETS = [
-    '/',
-    '/index.html',
-    '/manifest.webmanifest',
-    '/vite.svg'
-];
+// Self-destructing service worker.
+// This replaces any previously cached SW and immediately unregisters itself,
+// clearing stale caches that cause white-screen issues on redeployment.
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => self.skipWaiting());
+
+self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS);
-        })
-    );
-});
-
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
-        })
+        caches.keys().then((names) =>
+            Promise.all(names.map((name) => caches.delete(name)))
+        ).then(() => self.registration.unregister())
     );
 });
