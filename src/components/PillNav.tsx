@@ -23,16 +23,17 @@ const PillNav: React.FC<PillNavProps> = ({ items }) => {
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             padding: '8px',
-            borderRadius: '24px',
+            borderRadius: '32px', // Full pill shape
             display: 'flex',
             gap: '4px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
             border: '1px solid rgba(255,255,255,0.08)',
             width: '100%',
-            maxWidth: '380px',
+            height: '64px', // Standard pill height
             margin: '0 auto',
             overflow: 'hidden',
-            justifyContent: 'space-around'
+            justifyContent: 'space-around',
+            alignItems: 'center'
         }}>
             {items.map((item, index) => (
                 <button

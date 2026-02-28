@@ -17,10 +17,11 @@ A high-fidelity, personal daily timeline application with a premium dark aesthet
 - **Recurring Tasks**: Tag tasks as daily or weekly repeating.
 
 ### Navigation & UI
-- **Fluid Calendar**: Horizontally scrollable date picker with smooth auto-centering and a "Today" indicator.
-- **Glassmorphic Design**: Premium frosted-glass navigation bars with balanced symmetry.
+- **Fluid Calendar**: Horizontally scrollable date picker with premium grey selection pills, high-contrast white active text, and a centered triangle indicator.
+- **Glassmorphic Design**: Premium frosted-glass navigation bars with balanced symmetry and updated icon presence.
+- **Timeline Refinement**: A perfectly aligned vertical spine spanning between larger Sun and Moon icons for a cleaner, unified aesthetic.
 - **Staggered Animations**: Cards animate in on scroll with blur and slide transitions — replays on every scroll.
-- **Mobile Optimized**: Compressed timeline gutter for maximum card width on smaller screens.
+- **Mobile Optimized**: Compressed timeline gutter for maximum card width on smaller screens, with refined spacing for readability.
 
 ### Platform
 - **PWA Support**: Installable on mobile and desktop with offline caching via Service Worker.

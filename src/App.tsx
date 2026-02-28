@@ -245,15 +245,15 @@ function App() {
             zIndex: 2,
             backgroundColor: 'transparent'
           }}>
-            <Sun size={16} style={{ opacity: 0.6 }} />
+            <Sun size={20} style={{ opacity: 0.6 }} />
           </div>
 
           {/* Vertical Spine */}
           <div style={{
             position: 'absolute',
             left: '36px', // Shifted right to clear hour markers
-            top: '0px',
-            bottom: '-20px',
+            top: `${START_OFFSET - 20}px`,
+            height: `${events.length * (CARD_HEIGHT + CARD_GAP) + 40}px`,
             width: '2px',
             backgroundColor: 'var(--spine-gray)',
             zIndex: 0
@@ -302,6 +302,36 @@ function App() {
                 onEdit={startEdit}
               />
             ))}
+
+            {/* In-list Pill Nav Bar */}
+            <div style={{
+              marginTop: '40px',
+              marginLeft: '64px', // Align with EventCard
+              width: 'calc(100% - 64px)', // Take up remaining width
+              zIndex: 100,
+            }}>
+              <PillNav items={[
+                {
+                  id: 'create',
+                  label: 'Create',
+                  icon: Plus,
+                  onClick: () => { setEditingEvent(null); setIsModalOpen(true); }
+                },
+                {
+                  id: 'clear',
+                  label: 'Clear',
+                  icon: Trash2,
+                  onClick: clearEvents,
+                  destructive: true
+                },
+                {
+                  id: 'settings',
+                  label: 'Settings',
+                  icon: Settings,
+                  onClick: () => setIsSettingsOpen(true)
+                }
+              ]} />
+            </div>
           </div>
 
           {/* Bottom Moon Icon */}
@@ -318,7 +348,7 @@ function App() {
             backgroundColor: 'transparent',
             transition: 'top 0.5s ease'
           }}>
-            <Moon size={16} style={{ opacity: 0.6 }} />
+            <Moon size={20} style={{ opacity: 0.6 }} />
           </div>
 
         </div>
@@ -329,43 +359,11 @@ function App() {
           marginTop: '60px',
           color: 'var(--text-secondary)',
           fontSize: '15px',
-          paddingBottom: '120px', // Extra padding for the floating bar
+          paddingBottom: '40px',
         }}>
           <p>End of day: {timeLeft}</p>
         </div>
 
-        {/* Animated Pill Nav Bar */}
-        <div style={{
-          position: 'fixed',
-          bottom: '24px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'calc(100% - 40px)', // Full width minus page padding
-          maxWidth: '380px',
-          zIndex: 100,
-        }}>
-          <PillNav items={[
-            {
-              id: 'create',
-              label: 'Create event',
-              icon: Plus,
-              onClick: () => { setEditingEvent(null); setIsModalOpen(true); }
-            },
-            {
-              id: 'clear',
-              label: 'Clear',
-              icon: Trash2,
-              onClick: clearEvents,
-              destructive: true
-            },
-            {
-              id: 'settings',
-              label: 'Settings',
-              icon: Settings,
-              onClick: () => setIsSettingsOpen(true)
-            }
-          ]} />
-        </div>
 
         <AddEventModal
           isOpen={isModalOpen}

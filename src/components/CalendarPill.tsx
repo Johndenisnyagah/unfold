@@ -59,84 +59,62 @@ const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect 
         }
     }, [selectedDate]);
 
-    const monthName = selectedDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-
     return (
         <div
             ref={containerRef}
             style={{
-                backgroundColor: 'rgba(28, 28, 30, 0.7)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                padding: '8px 12px',
-                borderRadius: '28px',
+                backgroundColor: 'transparent',
+                padding: '24px 0',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                border: '1px solid rgba(255,255,255,0.08)',
                 width: '100%',
-                maxWidth: '380px',
+                maxWidth: '428px',
                 margin: '0 auto',
                 overflow: 'hidden',
                 position: 'relative'
             }}
         >
-            {/* Elegant Side Label: Month Name */}
-            <div style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '10px',
-                fontWeight: '900',
-                padding: '0 10px 0 6px',
-                letterSpacing: '0.1em',
-                borderRight: '1px solid rgba(255,255,255,0.1)',
-                whiteSpace: 'nowrap',
-                flexShrink: 0
-            }}>
-                {monthName}
-            </div>
-
             <div
                 ref={scrollRef}
                 style={{
                     display: 'flex',
-                    gap: '4px',
-                    flexGrow: 1,
+                    gap: '12px',
+                    width: '100%',
                     overflowX: 'auto',
                     scrollBehavior: 'smooth',
-                    scrollbarWidth: 'none', // Hide scrollbar Firefox
-                    msOverflowStyle: 'none', // Hide scrollbar IE/Edge
-                    padding: '0 40px' // Add padding so far-left/right items can center
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    padding: '0 180px', // Large padding to center items
+                    alignItems: 'center',
+                    height: '140px'
                 }}
                 className="hide-scrollbar"
             >
                 {days.map((date, index) => {
                     const active = isSameDay(date, selectedDate);
-                    const isToday = isSameDay(date, today);
 
                     return (
                         <motion.button
                             key={index}
                             data-active={active}
                             onClick={() => onDateSelect(date)}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
                             style={{
                                 position: 'relative',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                minWidth: '40px',
-                                height: '56px',
-                                borderRadius: '18px',
+                                padding: '20px 0 16px 0',
+                                minWidth: '56px',
+                                height: '110px',
+                                borderRadius: '28px',
                                 border: 'none',
                                 background: 'transparent',
                                 cursor: 'pointer',
                                 outline: 'none',
-                                transition: 'color 0.3s ease',
                                 flexShrink: 0,
-                                zIndex: 1
+                                zIndex: 1,
+                                transition: 'all 0.3s ease'
                             }}
                         >
                             {/* Animated Background Pill (Selection) */}
@@ -145,60 +123,64 @@ const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect 
                                     layoutId="calendar-pill-active"
                                     style={{
                                         position: 'absolute',
-                                        inset: 0,
-                                        backgroundColor: 'white',
-                                        borderRadius: '18px',
-                                        boxShadow: '0 4px 15px rgba(255, 255, 255, 0.2)',
+                                        inset: '10px 2px',
+                                        backgroundColor: '#333333',
+                                        borderRadius: '24px',
+                                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
                                         zIndex: 0
                                     }}
                                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                                 />
                             )}
 
-                            {/* Today Indicator (Subtle ring) */}
-                            {isToday && !active && (
-                                <div style={{
-                                    position: 'absolute',
-                                    inset: '4px',
-                                    border: '1.5px solid rgba(255, 255, 255, 0.15)',
-                                    borderRadius: '14px',
-                                    zIndex: 0
-                                }} />
-                            )}
-
-                            {/* Hover Highlight (Subtle) */}
-                            {!active && (
+                            {/* Downward Triangle Indicator */}
+                            {active ? (
                                 <motion.div
-                                    initial={{ opacity: 0 }}
-                                    whileHover={{ opacity: 1 }}
+                                    initial={{ opacity: 0, y: -5 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                        borderRadius: '18px',
-                                        zIndex: 0
+                                        width: 0,
+                                        height: 0,
+                                        borderLeft: '5px solid transparent',
+                                        borderRight: '5px solid transparent',
+                                        borderTop: '6px solid white',
+                                        marginTop: '-20px',
+                                        marginBottom: '16px',
+                                        zIndex: 2
                                     }}
                                 />
+                            ) : (
+                                <div style={{ height: '0px', marginTop: '-20px', marginBottom: '16px' }} />
                             )}
 
                             <span style={{
-                                fontSize: '9px',
+                                fontSize: '12px',
                                 fontWeight: '700',
-                                color: active ? 'black' : 'var(--text-secondary)',
+                                color: active ? 'white' : 'var(--text-secondary)',
                                 textTransform: 'uppercase',
-                                marginBottom: '2px',
+                                marginBottom: '12px',
                                 zIndex: 1
                             }}>
-                                {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                                {date.toLocaleDateString('en-US', { weekday: 'narrow' })}
                             </span>
-                            <span style={{
-                                fontSize: '16px',
-                                fontWeight: 'bold',
-                                color: active ? 'black' : 'var(--text-primary)',
-                                zIndex: 1
+
+                            <div style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: active ? 'white' : 'rgba(255,255,255,0.05)',
+                                border: !active ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                                zIndex: 1,
+                                color: active ? 'black' : 'var(--text-secondary)',
+                                fontWeight: '700',
+                                fontSize: '18px',
+                                boxShadow: active ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none'
                             }}>
-                                {String(date.getDate()).padStart(2, '0')}
-                            </span>
+                                {date.getDate()}
+                            </div>
                         </motion.button>
                     );
                 })}
@@ -209,7 +191,7 @@ const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect 
                     display: none;
                 }
             `}</style>
-        </div >
+        </div>
     );
 };
 
