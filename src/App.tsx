@@ -1,20 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { TimelineEvent, DailyTemplate } from './types';
-import { Sun, Moon, Plus, Trash2, Settings } from 'lucide-react';
+import DateGrid from './components/DateGrid';
+import AiPromptModal from './components/AiPromptModal';
+import AiIcon from './components/AiIcon';
 import EventCard from './components/EventCard';
 import CurrentTimeLine from './components/CurrentTimeLine';
 import AddEventModal from './components/AddEventModal';
 import SettingsPanel from './components/SettingsPanel';
 import PillNav from './components/PillNav';
-import CalendarPill from './components/CalendarPill';
 import { loadEvents, saveEvents, loadTemplates, saveTemplates } from './utils/storage';
+import { generateTimelineEvents } from './utils/ai';
+import { Sun, Moon, Plus, Trash2, Settings, Calendar } from 'lucide-react';
 
 import { initialEvents, CARD_HEIGHT, CARD_GAP, START_OFFSET } from './constants';
 
 function App() {
-  const [events, setEvents] = useState<TimelineEvent[]>(() => {
+  const [allEvents, setAllEvents] = useState<Record<string, TimelineEvent[]>>(() => {
     const saved = loadEvents();
-    return saved || initialEvents;
+    if (saved) return saved;
+
+    // Initial data for today if no saved data exists
+    const today = new Date().toISOString().split('T')[0];
+    return { [today]: initialEvents };
   });
   const [templates, setTemplates] = useState<DailyTemplate[]>(() => {
     return loadTemplates() || [];
@@ -22,14 +30,55 @@ function App() {
   const [timeLeft, setTimeLeft] = useState('');
   const [currentTimeTop, setCurrentTimeTop] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [view, setView] = useState<'calendar' | 'timeline'>('calendar');
+
+  const dateProgress = useMemo(() => {
+    const progress: Record<string, number> = {};
+    Object.entries(allEvents).forEach(([date, dayEvents]) => {
+      if (dayEvents.length === 0) {
+        progress[date] = 0;
+      } else {
+        const completed = dayEvents.filter(e => e.isCompleted).length;
+        progress[date] = completed / dayEvents.length;
+      }
+    });
+    return progress;
+  }, [allEvents]);
+
+  const getDateKey = (date: Date) => {
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().split('T')[0];
+  };
+
+  const dateKey = getDateKey(selectedDate);
+  const events = allEvents[dateKey] || [];
+
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('unfold-theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  });
+
+  // Theme persistence
+  useEffect(() => {
+    localStorage.setItem('unfold-theme', theme);
+    if (theme === 'light') {
+      document.documentElement.classList.add('light-theme');
+    } else {
+      document.documentElement.classList.remove('light-theme');
+    }
+  }, [theme]);
 
   // Persistence
   useEffect(() => {
-    saveEvents(events);
-  }, [events]);
+    saveEvents(allEvents);
+  }, [allEvents]);
 
   useEffect(() => {
     saveTemplates(templates);
@@ -119,25 +168,35 @@ function App() {
   }, [events]);
 
   const toggleEvent = (id: string) => {
-    setEvents(prev => prev.map(ev =>
-      ev.id === id ? { ...ev, isCompleted: !ev.isCompleted } : ev
-    ));
+    setAllEvents(prev => ({
+      ...prev,
+      [dateKey]: (prev[dateKey] || []).map(ev =>
+        ev.id === id ? { ...ev, isCompleted: !ev.isCompleted } : ev
+      )
+    }));
   };
 
   const handleAddOrUpdateEvent = (event: TimelineEvent) => {
-    setEvents(prev => {
-      const exists = prev.find(e => e.id === event.id);
+    setAllEvents(prev => {
+      const currentDayEvents = prev[dateKey] || [];
+      const exists = currentDayEvents.find(e => e.id === event.id);
+      let updatedDayEvents;
       if (exists) {
-        return sortEvents(prev.map(e => e.id === event.id ? event : e));
+        updatedDayEvents = sortEvents(currentDayEvents.map(e => e.id === event.id ? event : e));
+      } else {
+        updatedDayEvents = sortEvents([...currentDayEvents, event]);
       }
-      return sortEvents([...prev, event]);
+      return { ...prev, [dateKey]: updatedDayEvents };
     });
     setEditingEvent(null);
   };
 
   const deleteEvent = (id: string) => {
     if (window.confirm('Delete this event?')) {
-      setEvents(prev => prev.filter(e => e.id !== id));
+      setAllEvents(prev => ({
+        ...prev,
+        [dateKey]: (prev[dateKey] || []).filter(e => e.id !== id)
+      }));
     }
   };
 
@@ -147,13 +206,37 @@ function App() {
   };
 
   const clearEvents = () => {
-    if (window.confirm('Clear all events?')) {
-      setEvents([]);
+    if (window.confirm('Clear all events for this day?')) {
+      setAllEvents(prev => ({ ...prev, [dateKey]: [] }));
     }
   };
 
   const handleImportEvents = (newEvents: TimelineEvent[]) => {
-    setEvents(sortEvents(newEvents));
+    setAllEvents(prev => ({ ...prev, [dateKey]: sortEvents(newEvents) }));
+  };
+
+  const handleAiGenerate = async (prompt: string) => {
+    try {
+      setIsGeneratingAi(true);
+      const generatedEvents = await generateTimelineEvents(prompt);
+
+      if (generatedEvents.length > 0) {
+        setAllEvents(prev => ({
+          ...prev,
+          [dateKey]: sortEvents([...(prev[dateKey] || []), ...generatedEvents])
+        }));
+        setIsAiModalOpen(false);
+      }
+    } catch (err: any) {
+      console.error("AI Generation Error:", err);
+      let message = err.message || 'Unknown error';
+      if (message.includes('429') || message.includes('quota')) {
+        message = "AI Quota exceeded. Please wait a few seconds and try again, or check your rate limits in Google AI Studio.";
+      }
+      alert(`Failed to generate events: ${message}`);
+    } finally {
+      setIsGeneratingAi(false);
+    }
   };
 
   const handleSaveTemplate = (name: string) => {
@@ -172,7 +255,7 @@ function App() {
   };
 
   const handleApplyTemplate = (template: DailyTemplate) => {
-    if (events.length > 0 && !window.confirm('Apply template? This will replace your current timeline.')) {
+    if (events.length > 0 && !window.confirm('Apply template? This will replace your current timeline for this day.')) {
       return;
     }
 
@@ -184,12 +267,12 @@ function App() {
       return {
         ...te,
         id: Math.random().toString(36).substr(2, 9),
+        isCompleted: false,
         durationMinutes: duration > 0 ? duration : 30,
-        isCompleted: false
       };
     });
 
-    setEvents(sortEvents(templateEvents));
+    setAllEvents(prev => ({ ...prev, [dateKey]: sortEvents(templateEvents) }));
     setIsSettingsOpen(false);
   };
 
@@ -212,179 +295,305 @@ function App() {
     });
   };
 
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    setView('timeline');
+  };
+
+  const handleThemeChange = (newTheme: 'dark' | 'light') => {
+    // @ts-ignore - document.startViewTransition is not yet in TypeScript types
+    if (!document.startViewTransition) {
+      setTheme(newTheme);
+      return;
+    }
+
+    // @ts-ignore
+    document.startViewTransition(() => {
+      setTheme(newTheme);
+    });
+  };
+
+  const viewTransition = {
+    duration: 0.5,
+    ease: [0.4, 0, 0.2, 1] as any // Premium cubic-bezier
+  };
+
   return (
-    <>
-      <div className="app-container" style={{
-        padding: '40px 16px',
-        minHeight: '100vh',
-        position: 'relative',
-        zIndex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px'
-      }}>
-        {/* Top Calendar Navigation */}
-        <CalendarPill
-          selectedDate={selectedDate}
-          onDateSelect={setSelectedDate}
-        />
-
-        {/* Timeline Column */}
-        <div style={{ position: 'relative', flexGrow: 1, marginLeft: '40px' }}> {/* Balanced margin */}
-
-          {/* Top Sun Icon */}
-          <div style={{
-            position: 'absolute',
-            left: '24px', // Shifted right to clear hour markers
-            top: `${START_OFFSET - 40}px`,
-            width: '24px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2,
-            backgroundColor: 'transparent'
-          }}>
-            <Sun size={20} style={{ opacity: 0.6 }} />
-          </div>
-
-          {/* Vertical Spine */}
-          <div style={{
-            position: 'absolute',
-            left: '36px', // Shifted right to clear hour markers
-            top: `${START_OFFSET - 20}px`,
-            height: `${events.length * (CARD_HEIGHT + CARD_GAP) + 40}px`,
-            width: '2px',
-            backgroundColor: 'var(--spine-gray)',
-            zIndex: 0
-          }}></div>
-
-          {/* Current Time Line */}
-          <CurrentTimeLine top={currentTimeTop} />
-
-          {/* Dynamic Hour Markers */}
-          {Array.from(new Set(events.map(e => parseInt(e.startTime.split(':')[0])))).sort((a, b) => a - b).map(hour => {
-            const y = getTimeY(`${String(hour).padStart(2, '0')}:00`);
-            if (y < START_OFFSET) return null;
-            return (
-              <div key={hour} style={{
-                position: 'absolute',
-                left: '-32px', // Brought back into visible bounds (Absolute 8px)
-                top: `${y}px`,
-                color: 'var(--text-secondary)',
-                fontWeight: 'bold',
-                fontSize: '38px', // Slightly taller for prominence
-                opacity: 0.35,
-                transform: 'translateY(-50%)',
-                transition: 'top 0.5s ease',
-                letterSpacing: '-0.02em',
-                zIndex: 1
-              }}>
-                {String(hour).padStart(2, '0')}
-              </div>
-            );
-          })}
-
-          {/* Events Stack */}
-          <div className="events-list" style={{
-            paddingTop: `${START_OFFSET}px`,
+    <AnimatePresence mode="wait">
+      {view === 'calendar' ? (
+        <motion.div
+          key="calendar"
+          initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
+          transition={viewTransition}
+          className="app-container"
+          style={{
+            padding: '40px 16px',
+            minHeight: '100vh',
             display: 'flex',
             flexDirection: 'column',
-            gap: `${CARD_GAP}px`
-          }}>
-            {events.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                hasConflict={checkConflict(event, events)}
-                onToggle={toggleEvent}
-                onDelete={deleteEvent}
-                onEdit={startEdit}
-              />
-            ))}
+            justifyContent: 'center'
+          }}
+        >
+          <DateGrid
+            selectedDate={selectedDate}
+            onDateSelect={handleDateSelect}
+            dateProgress={dateProgress}
+          />
 
-            {/* In-list Pill Nav Bar */}
-            <div style={{
-              marginTop: '40px',
-              marginLeft: '64px', // Align with EventCard
-              width: 'calc(100% - 64px)', // Take up remaining width
-              zIndex: 100,
-            }}>
-              <PillNav items={[
-                {
-                  id: 'create',
-                  label: 'Create',
-                  icon: Plus,
-                  onClick: () => { setEditingEvent(null); setIsModalOpen(true); }
-                },
-                {
-                  id: 'clear',
-                  label: 'Clear',
-                  icon: Trash2,
-                  onClick: clearEvents,
-                  destructive: true
-                },
-                {
-                  id: 'settings',
-                  label: 'Settings',
-                  icon: Settings,
-                  onClick: () => setIsSettingsOpen(true)
-                }
-              ]} />
+          <div style={{
+            position: 'fixed',
+            bottom: '40px',
+            right: '40px',
+            zIndex: 100
+          }}>
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '28px',
+                backgroundColor: 'var(--selection-bg)',
+                border: 'none',
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+              }}
+            >
+              <Settings size={24} />
+            </button>
+          </div>
+
+          <SettingsPanel
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            events={events}
+            onImport={handleImportEvents}
+            onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
+            templates={templates}
+            onSaveTemplate={handleSaveTemplate}
+            onApplyTemplate={handleApplyTemplate}
+            onDeleteTemplate={handleDeleteTemplate}
+            theme={theme}
+            onThemeChange={handleThemeChange}
+          />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="timeline"
+          initial={{ opacity: 0, x: 20, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, x: -20, filter: 'blur(10px)' }}
+          transition={viewTransition}
+          className="app-container"
+          style={{
+            padding: '40px 16px',
+            minHeight: '100vh',
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px'
+          }}
+        >
+          <div
+            onClick={() => setView('calendar')}
+            style={{
+              padding: '20px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              width: 'fit-content'
+            }}
+          >
+            <div style={{ fontSize: '48px', fontWeight: '800' }}>{selectedDate.getDate()}</div>
+            <div>
+              <div style={{ fontWeight: '700', textTransform: 'uppercase' }}>{selectedDate.toLocaleDateString('en-US', { month: 'short' })}</div>
+              <div style={{ opacity: 0.6 }}>{selectedDate.toLocaleDateString('en-US', { weekday: 'short' })}</div>
             </div>
           </div>
 
-          {/* Bottom Moon Icon */}
-          <div style={{
-            position: 'absolute',
-            left: '24px', // Match Sun alignment
-            top: `${events.length * (CARD_HEIGHT + CARD_GAP) + START_OFFSET}px`,
-            width: '24px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2,
-            backgroundColor: 'transparent',
-            transition: 'top 0.5s ease'
-          }}>
-            <Moon size={20} style={{ opacity: 0.6 }} />
+          <div style={{ position: 'relative', flexGrow: 1, marginLeft: '40px' }}>
+            <div style={{
+              position: 'absolute',
+              left: '24px',
+              top: `${START_OFFSET - 40}px`,
+              width: '24px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2
+            }}>
+              <Sun size={20} style={{ opacity: 0.6 }} />
+            </div>
+
+            <div style={{
+              position: 'absolute',
+              left: '36px',
+              top: `${START_OFFSET - 20}px`,
+              height: `${events.length * (CARD_HEIGHT + CARD_GAP) + 40}px`,
+              width: '2px',
+              backgroundColor: 'var(--spine-gray)',
+              zIndex: 0
+            }}></div>
+
+            <CurrentTimeLine top={currentTimeTop} />
+
+            <AnimatePresence>
+              {Array.from(new Set(events.map(e => parseInt(e.startTime.split(':')[0])))).sort((a, b) => a - b).map(hour => {
+                const y = getTimeY(`${String(hour).padStart(2, '0')}:00`);
+                if (y < START_OFFSET) return null;
+                return (
+                  <motion.div
+                    key={hour}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 0.35, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    style={{
+                      position: 'absolute',
+                      left: '-32px',
+                      top: `${y}px`,
+                      color: 'var(--text-secondary)',
+                      fontWeight: 'bold',
+                      fontSize: '38px',
+                      transform: 'translateY(-50%)',
+                      letterSpacing: '-0.02em',
+                      zIndex: 1
+                    }}
+                  >
+                    {String(hour).padStart(2, '0')}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
+            <div className="events-list" style={{
+              paddingTop: `${START_OFFSET}px`,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: `${CARD_GAP}px`
+            }}>
+              <AnimatePresence mode="popLayout">
+                {events.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    hasConflict={checkConflict(event, events)}
+                    onToggle={toggleEvent}
+                    onDelete={deleteEvent}
+                    onEdit={startEdit}
+                  />
+                ))}
+              </AnimatePresence>
+
+              <div style={{
+                marginTop: '40px',
+                marginLeft: '48px',
+                width: 'calc(100% - 48px)',
+                zIndex: 100,
+              }}>
+                <PillNav items={[
+                  {
+                    id: 'calendar',
+                    label: 'Calendar',
+                    icon: Calendar,
+                    onClick: () => setView('calendar')
+                  },
+                  {
+                    id: 'create',
+                    label: 'Create',
+                    icon: Plus,
+                    onClick: () => { setEditingEvent(null); setIsModalOpen(true); }
+                  },
+                  {
+                    id: 'clear',
+                    label: 'Clear',
+                    icon: Trash2,
+                    onClick: clearEvents,
+                    destructive: true
+                  },
+                  {
+                    id: 'magic',
+                    label: 'Magic',
+                    icon: AiIcon as any,
+                    onClick: () => setIsAiModalOpen(true),
+                    color: 'var(--accent-orange-vibrant)'
+                  },
+                  {
+                    id: 'settings',
+                    label: 'Settings',
+                    icon: Settings,
+                    onClick: () => setIsSettingsOpen(true)
+                  }
+                ]} />
+              </div>
+            </div>
+
+            <motion.div
+              layout
+              style={{
+                position: 'absolute',
+                left: '24px',
+                top: `${events.length * (CARD_HEIGHT + CARD_GAP) + START_OFFSET}px`,
+                width: '24px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 2
+              }}
+            >
+              <Moon size={20} style={{ opacity: 0.6 }} />
+            </motion.div>
           </div>
 
-        </div>
+          <div style={{
+            marginLeft: '100px',
+            marginTop: '60px',
+            color: 'var(--text-secondary)',
+            fontSize: '15px',
+            paddingBottom: '40px',
+          }}>
+            <p>End of day: {timeLeft}</p>
+          </div>
 
-        {/* Footer Info */}
-        <div style={{
-          marginLeft: '100px',
-          marginTop: '60px',
-          color: 'var(--text-secondary)',
-          fontSize: '15px',
-          paddingBottom: '40px',
-        }}>
-          <p>End of day: {timeLeft}</p>
-        </div>
+          <AddEventModal
+            isOpen={isModalOpen}
+            onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
+            onAdd={handleAddOrUpdateEvent}
+            eventToEdit={editingEvent}
+            theme={theme}
+          />
 
+          <SettingsPanel
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            events={events}
+            onImport={handleImportEvents}
+            onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
+            templates={templates}
+            onSaveTemplate={handleSaveTemplate}
+            onApplyTemplate={handleApplyTemplate}
+            onDeleteTemplate={handleDeleteTemplate}
+            theme={theme}
+            onThemeChange={setTheme}
+          />
 
-        <AddEventModal
-          isOpen={isModalOpen}
-          onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
-          onAdd={handleAddOrUpdateEvent}
-          eventToEdit={editingEvent}
-        />
-
-        <SettingsPanel
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          events={events}
-          onImport={handleImportEvents}
-          onClear={() => setEvents([])}
-          templates={templates}
-          onSaveTemplate={handleSaveTemplate}
-          onApplyTemplate={handleApplyTemplate}
-          onDeleteTemplate={handleDeleteTemplate}
-        />
-      </div>
-    </>
+          <AiPromptModal
+            isOpen={isAiModalOpen}
+            onClose={() => setIsAiModalOpen(false)}
+            onGenerate={handleAiGenerate}
+            isGenerating={isGeneratingAi}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

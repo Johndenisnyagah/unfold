@@ -8,6 +8,8 @@ export interface NavItem {
     icon: LucideIcon;
     onClick: () => void;
     destructive?: boolean;
+    color?: string;
+    showLabel?: boolean;
 }
 
 interface PillNavProps {
@@ -19,15 +21,15 @@ const PillNav: React.FC<PillNavProps> = ({ items }) => {
 
     return (
         <div style={{
-            backgroundColor: 'rgba(28, 28, 30, 0.7)',
+            backgroundColor: 'var(--card-bg-translucent)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             padding: '8px',
             borderRadius: '32px', // Full pill shape
             display: 'flex',
             gap: '4px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+            border: '1px solid var(--border-subtle)',
             width: '100%',
             height: '64px', // Standard pill height
             margin: '0 auto',
@@ -35,66 +37,71 @@ const PillNav: React.FC<PillNavProps> = ({ items }) => {
             justifyContent: 'space-around',
             alignItems: 'center'
         }}>
-            {items.map((item, index) => (
-                <button
-                    key={item.id}
-                    onClick={item.onClick}
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                    style={{
-                        position: 'relative',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        padding: item.id === 'create' ? '12px 24px' : '12px',
-                        minWidth: item.id === 'create' ? '140px' : '52px',
-                        borderRadius: '16px',
-                        border: 'none',
-                        background: 'transparent',
-                        color: 'var(--text-primary)',
-                        cursor: 'pointer',
-                        fontSize: '15px',
-                        fontWeight: '600',
-                        zIndex: 1,
-                        transition: 'color 0.2s ease',
-                        outline: 'none'
-                    }}
-                >
-                    {/* Animated Background Pill */}
-                    {hoveredIndex === index && (
-                        <motion.div
-                            layoutId="pill-hover"
-                            style={{
-                                position: 'absolute',
-                                inset: 0,
-                                backgroundColor: item.id === 'create' ? 'white' : 'rgba(255, 255, 255, 0.08)',
-                                borderRadius: '16px',
-                                zIndex: -1
-                            }}
-                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                        />
-                    )}
+            {items.map((item, index) => {
+                const shouldShowLabel = !!item.showLabel;
+                const isHovered = hoveredIndex === index;
 
-                    <item.icon
-                        size={20}
-                        strokeWidth={item.id === 'create' ? 3 : 2}
+                return (
+                    <button
+                        key={item.id}
+                        onClick={item.onClick}
+                        onMouseEnter={() => setHoveredIndex(index)}
+                        onMouseLeave={() => setHoveredIndex(null)}
                         style={{
-                            color: hoveredIndex === index && item.id === 'create' ? 'black' : 'inherit',
-                            transition: 'color 0.2s ease'
+                            position: 'relative',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            padding: shouldShowLabel ? '12px 14px' : '10px',
+                            minWidth: shouldShowLabel ? '80px' : '44px',
+                            borderRadius: '16px',
+                            border: 'none',
+                            background: 'transparent',
+                            color: 'var(--text-primary)',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            zIndex: 1,
+                            transition: 'all 0.2s ease',
+                            outline: 'none'
                         }}
-                    />
+                    >
+                        {/* Animated Background Pill */}
+                        {isHovered && (
+                            <motion.div
+                                layoutId="pill-hover"
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    backgroundColor: item.color || (item.id === 'create' ? 'var(--text-primary)' : 'var(--pill-circle-bg)'),
+                                    borderRadius: '16px',
+                                    zIndex: -1
+                                }}
+                                transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                            />
+                        )}
 
-                    {item.id === 'create' && (
-                        <span style={{
-                            color: hoveredIndex === index ? 'black' : 'white',
-                            transition: 'color 0.2s ease'
-                        }}>
-                            {item.label}
-                        </span>
-                    )}
-                </button>
-            ))}
+                        <item.icon
+                            size={20}
+                            strokeWidth={item.id === 'create' ? 3 : 2}
+                            style={{
+                                color: isHovered && (item.color || item.id === 'create') ? 'var(--bg-black)' : (isHovered ? 'var(--text-primary)' : (item.color || 'inherit')),
+                                transition: 'color 0.2s ease'
+                            }}
+                        />
+
+                        {shouldShowLabel && (
+                            <span style={{
+                                color: isHovered && (item.color || item.id === 'create') ? 'var(--bg-black)' : 'inherit',
+                                transition: 'color 0.2s ease'
+                            }}>
+                                {item.label}
+                            </span>
+                        )}
+                    </button>
+                );
+            })}
         </div>
     );
 };

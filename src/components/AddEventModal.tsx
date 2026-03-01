@@ -8,6 +8,7 @@ interface AddEventModalProps {
     onClose: () => void;
     onAdd: (event: TimelineEvent) => void;
     eventToEdit?: TimelineEvent | null;
+    theme: 'dark' | 'light';
 }
 
 const COLORS = [
@@ -29,7 +30,7 @@ const COLORS = [
 
 const ICONS = Object.keys(ICON_MAP);
 
-const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventToEdit }) => {
+const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventToEdit, theme }) => {
     const [title, setTitle] = useState('');
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('10:00');
@@ -97,15 +98,15 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                 style={{
                     width: '100%',
                     maxWidth: '430px', // Mobile width
-                    backgroundColor: 'rgba(28, 28, 30, 0.8)',
+                    backgroundColor: 'var(--card-bg-translucent)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
                     borderRadius: '24px',
                     padding: '24px',
                     maxHeight: '80vh',
                     overflowY: 'auto',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                    border: '1px solid var(--border-subtle)',
                 }}
             >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -127,11 +128,11 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                             autoFocus
                             style={{
                                 width: '100%',
-                                backgroundColor: '#2c2c2e',
+                                backgroundColor: 'var(--selection-bg)',
                                 border: 'none',
                                 borderRadius: '12px',
                                 padding: '16px',
-                                color: 'white',
+                                color: 'var(--text-primary)',
                                 fontSize: '16px',
                                 outline: 'none',
                             }}
@@ -147,14 +148,14 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                 onChange={(e) => setStartTime(e.target.value)}
                                 style={{
                                     width: '100%',
-                                    backgroundColor: '#2c2c2e',
+                                    backgroundColor: 'var(--selection-bg)',
                                     border: 'none',
                                     borderRadius: '12px',
                                     padding: '16px',
-                                    color: 'white',
+                                    color: 'var(--text-primary)',
                                     fontSize: '16px',
                                     outline: 'none',
-                                    colorScheme: 'dark',
+                                    colorScheme: theme === 'light' ? 'light' : 'dark',
                                 }}
                             />
                         </div>
@@ -166,14 +167,14 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                 onChange={(e) => setEndTime(e.target.value)}
                                 style={{
                                     width: '100%',
-                                    backgroundColor: '#2c2c2e',
+                                    backgroundColor: 'var(--selection-bg)',
                                     border: 'none',
                                     borderRadius: '12px',
                                     padding: '16px',
-                                    color: 'white',
+                                    color: 'var(--text-primary)',
                                     fontSize: '16px',
                                     outline: 'none',
-                                    colorScheme: 'dark',
+                                    colorScheme: theme === 'light' ? 'light' : 'dark',
                                 }}
                             />
                         </div>
@@ -191,7 +192,7 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                         width: '44px',
                                         height: '44px',
                                         borderRadius: '12px',
-                                        backgroundColor: iconName === icon ? color : '#2c2c2e',
+                                        backgroundColor: iconName === icon ? color : 'var(--selection-bg)',
                                         border: 'none',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -219,7 +220,7 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                         height: '44px',
                                         borderRadius: '50%',
                                         backgroundColor: c,
-                                        border: color === c ? '3px solid white' : '3px solid transparent',
+                                        border: color === c ? '3px solid var(--text-primary)' : '3px solid transparent',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
                                     }}
@@ -232,8 +233,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                         type="submit"
                         style={{
                             marginTop: '12px',
-                            backgroundColor: 'white',
-                            color: 'black',
+                            backgroundColor: 'var(--text-primary)',
+                            color: 'var(--bg-black)',
                             border: 'none',
                             borderRadius: '16px',
                             padding: '18px',

@@ -52,7 +52,7 @@ const EventCard: FC<EventCardProps> = ({ event, hasConflict = false, onToggle, o
             )}
 
             <div className="event-card" style={{
-                backgroundColor: 'rgba(44, 44, 46, 0.7)',
+                backgroundColor: 'var(--card-bg-translucent)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
                 borderRadius: '16px',
@@ -62,8 +62,8 @@ const EventCard: FC<EventCardProps> = ({ event, hasConflict = false, onToggle, o
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                boxShadow: hasConflict ? '0 8px 32px rgba(255, 59, 48, 0.15)' : '0 8px 24px rgba(0,0,0,0.2)',
-                border: hasConflict ? '1px solid rgba(255, 59, 48, 0.3)' : '1px solid rgba(255,255,255,0.08)',
+                boxShadow: hasConflict ? '0 8px 32px rgba(255, 59, 48, 0.15)' : '0 8px 24px rgba(0,0,0,0.1)',
+                border: hasConflict ? '1px solid rgba(255, 59, 48, 0.3)' : '1px solid var(--border-subtle)',
                 overflow: 'hidden',
                 transition: 'all 0.3s ease'
             }}>

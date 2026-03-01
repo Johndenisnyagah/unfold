@@ -124,9 +124,9 @@ const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect 
                                     style={{
                                         position: 'absolute',
                                         inset: '10px 2px',
-                                        backgroundColor: '#333333',
+                                        backgroundColor: 'var(--selection-bg)',
                                         borderRadius: '24px',
-                                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+                                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
                                         zIndex: 0
                                     }}
                                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
@@ -143,7 +143,7 @@ const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect 
                                         height: 0,
                                         borderLeft: '5px solid transparent',
                                         borderRight: '5px solid transparent',
-                                        borderTop: '6px solid white',
+                                        borderTop: '6px solid var(--text-primary)',
                                         marginTop: '-20px',
                                         marginBottom: '16px',
                                         zIndex: 2
@@ -156,7 +156,7 @@ const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect 
                             <span style={{
                                 fontSize: '12px',
                                 fontWeight: '700',
-                                color: active ? 'white' : 'var(--text-secondary)',
+                                color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
                                 textTransform: 'uppercase',
                                 marginBottom: '12px',
                                 zIndex: 1
@@ -171,10 +171,10 @@ const CalendarPill: React.FC<CalendarPillProps> = ({ selectedDate, onDateSelect 
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                backgroundColor: active ? 'white' : 'rgba(255,255,255,0.05)',
-                                border: !active ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                                backgroundColor: active ? 'var(--text-primary)' : 'var(--pill-circle-bg)',
+                                border: !active ? '1px solid var(--border-subtle)' : 'none',
                                 zIndex: 1,
-                                color: active ? 'black' : 'var(--text-secondary)',
+                                color: active ? 'var(--bg-black)' : 'var(--text-secondary)',
                                 fontWeight: '700',
                                 fontSize: '18px',
                                 boxShadow: active ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none'

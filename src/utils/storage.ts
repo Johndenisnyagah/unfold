@@ -3,7 +3,7 @@ import type { TimelineEvent, DailyTemplate } from '../types';
 const STORAGE_KEY = 'unfold_events';
 const TEMPLATE_KEY = 'unfold_templates';
 
-export const saveEvents = (events: TimelineEvent[]) => {
+export const saveEvents = (events: Record<string, TimelineEvent[]>) => {
     try {
         const serializedEvents = JSON.stringify(events);
         localStorage.setItem(STORAGE_KEY, serializedEvents);
@@ -12,13 +12,20 @@ export const saveEvents = (events: TimelineEvent[]) => {
     }
 };
 
-export const loadEvents = (): TimelineEvent[] | null => {
+export const loadEvents = (): Record<string, TimelineEvent[]> | null => {
     try {
         const serializedEvents = localStorage.getItem(STORAGE_KEY);
         if (serializedEvents === null) return null;
 
-        const events = JSON.parse(serializedEvents);
-        return Array.isArray(events) ? events : null;
+        const data = JSON.parse(serializedEvents);
+
+        // Migration: If it's a legacy array, wrap it in a "global" or current date key
+        if (Array.isArray(data)) {
+            const today = new Date().toISOString().split('T')[0];
+            return { [today]: data };
+        }
+
+        return typeof data === 'object' ? data : null;
     } catch (err) {
         console.error('Could not load events', err);
         return null;

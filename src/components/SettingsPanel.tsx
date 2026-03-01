@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { X, Download, Upload, Trash2, Plus, Play, Bookmark } from 'lucide-react';
+import { X, Download, Upload, Trash2, Plus, Play, Bookmark, Sun, Moon } from 'lucide-react';
 import type { TimelineEvent, DailyTemplate } from '../types';
 
 interface SettingsPanelProps {
@@ -12,6 +12,8 @@ interface SettingsPanelProps {
     onSaveTemplate: (name: string) => void;
     onApplyTemplate: (template: DailyTemplate) => void;
     onDeleteTemplate: (id: string) => void;
+    theme: 'dark' | 'light';
+    onThemeChange: (theme: 'dark' | 'light') => void;
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
@@ -23,7 +25,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     templates,
     onSaveTemplate,
     onApplyTemplate,
-    onDeleteTemplate
+    onDeleteTemplate,
+    theme,
+    onThemeChange
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [templateName, setTemplateName] = useState('');
@@ -78,25 +82,29 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.8)',
+            backgroundColor: 'var(--overlay-bg)',
             zIndex: 1000,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             padding: '20px',
+            touchAction: 'none', // Prevent background scrolling
+            overflow: 'hidden',
         }}>
             <div style={{
-                backgroundColor: 'rgba(28, 28, 30, 0.8)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
+                backgroundColor: 'var(--card-bg-translucent)',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
                 borderRadius: '24px',
                 padding: '24px',
-                width: '100%',
-                maxWidth: '430px',
-                maxHeight: '80vh',
+                width: 'calc(100% - 40px)', // Precise viewport fit
+                maxWidth: '400px', // More compact, solid feel
+                maxHeight: '85vh',
                 overflowY: 'auto',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-                border: '1px solid rgba(255,255,255,0.1)',
+                overflowX: 'hidden', // Stop any horizontal jitter
+                boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+                border: '1px solid var(--border-subtle)',
+                userSelect: 'none', // Feel more like a native component
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Settings</h2>
@@ -117,7 +125,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
-                                    backgroundColor: '#2c2c2e',
+                                    backgroundColor: 'var(--pill-circle-bg)',
                                     padding: '12px 16px',
                                     borderRadius: '16px',
                                 }}>
@@ -176,7 +184,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                 </button>
                             ) : (
                                 <div style={{
-                                    backgroundColor: '#2c2c2e',
+                                    backgroundColor: 'var(--pill-circle-bg)',
                                     padding: '16px',
                                     borderRadius: '16px',
                                     display: 'flex',
@@ -189,9 +197,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                         value={templateName}
                                         onChange={(e) => setTemplateName(e.target.value)}
                                         style={{
-                                            backgroundColor: '#1c1c1e',
-                                            border: 'none',
-                                            color: 'white',
+                                            backgroundColor: 'var(--input-bg)',
+                                            border: '1px solid var(--border-subtle)',
+                                            color: 'var(--text-primary)',
                                             padding: '12px',
                                             borderRadius: '8px',
                                             fontSize: '14px'
@@ -203,8 +211,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                             disabled={!templateName.trim()}
                                             style={{
                                                 flexGrow: 1,
-                                                backgroundColor: 'white',
-                                                color: 'black',
+                                                backgroundColor: 'var(--text-primary)',
+                                                color: 'var(--bg-black)',
                                                 border: 'none',
                                                 padding: '10px',
                                                 borderRadius: '8px',
@@ -220,8 +228,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                             style={{
                                                 flexGrow: 1,
                                                 backgroundColor: 'transparent',
-                                                color: 'white',
-                                                border: '1px solid #444',
+                                                color: 'var(--text-primary)',
+                                                border: '1px solid var(--border-subtle)',
                                                 padding: '10px',
                                                 borderRadius: '8px',
                                                 cursor: 'pointer'
@@ -235,55 +243,114 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         </div>
                     </section>
 
+                    {/* Theme Section */}
+                    <section>
+                        <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: 'bold' }}>APPEARANCE</h3>
+                        <div style={{
+                            display: 'flex',
+                            backgroundColor: 'var(--pill-circle-bg)',
+                            padding: '4px',
+                            borderRadius: '12px',
+                            gap: '4px'
+                        }}>
+                            <button
+                                onClick={() => onThemeChange('dark')}
+                                style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    backgroundColor: theme === 'dark' ? 'var(--bg-black)' : 'transparent',
+                                    color: theme === 'dark' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <Moon size={16} fill={theme === 'dark' ? 'var(--text-primary)' : 'none'} /> Dark
+                            </button>
+                            <button
+                                onClick={() => onThemeChange('light')}
+                                style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    backgroundColor: theme === 'light' ? 'var(--bg-black)' : 'transparent',
+                                    color: theme === 'light' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <Sun size={16} fill={theme === 'light' ? 'var(--text-primary)' : 'none'} /> Light
+                            </button>
+                        </div>
+                    </section>
+
                     {/* Data Management Section */}
                     <section>
                         <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '12px', fontWeight: 'bold' }}>DATA MANAGEMENT</h3>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{
+                            display: 'flex',
+                            backgroundColor: 'var(--pill-circle-bg)',
+                            padding: '4px',
+                            borderRadius: '12px',
+                            gap: '4px'
+                        }}>
                             <button
                                 onClick={handleExport}
                                 style={{
+                                    flex: 1,
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '12px',
-                                    backgroundColor: '#2c2c2e',
-                                    color: 'white',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    padding: '10px',
+                                    borderRadius: '8px',
                                     border: 'none',
-                                    padding: '16px',
-                                    borderRadius: '16px',
-                                    fontSize: '16px',
+                                    backgroundColor: 'transparent',
+                                    color: 'var(--text-primary)',
                                     cursor: 'pointer',
-                                    textAlign: 'left',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    transition: 'all 0.2s'
                                 }}
                             >
-                                <Download size={20} />
-                                <div>
-                                    <div style={{ fontWeight: '600' }}>Export Backup</div>
-                                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Download your timeline as a JSON file</div>
-                                </div>
+                                <Download size={16} /> Export
                             </button>
 
                             <button
                                 onClick={() => fileInputRef.current?.click()}
                                 style={{
+                                    flex: 1,
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '12px',
-                                    backgroundColor: '#2c2c2e',
-                                    color: 'white',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    padding: '10px',
+                                    borderRadius: '8px',
                                     border: 'none',
-                                    padding: '16px',
-                                    borderRadius: '16px',
-                                    fontSize: '16px',
+                                    backgroundColor: 'transparent',
+                                    color: 'var(--text-primary)',
                                     cursor: 'pointer',
-                                    textAlign: 'left',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    transition: 'all 0.2s'
                                 }}
                             >
-                                <Upload size={20} />
-                                <div>
-                                    <div style={{ fontWeight: '600' }}>Import Backup</div>
-                                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Restore your timeline from a JSON file</div>
-                                </div>
+                                <Upload size={16} /> Import
                             </button>
                             <input
                                 type="file"
