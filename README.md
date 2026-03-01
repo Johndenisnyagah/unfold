@@ -2,6 +2,9 @@
 
 A high-fidelity, personal daily timeline application with a premium aesthetic and a unique "Liquid Timeline" that prioritizes visual uniformity and clarity. Installable as a PWA for a native-app feel.
 
+> 🚀 **What's New — AI Magic Timeline is LIVE!**
+> Describe your day in plain language and let Gemini AI generate your entire timeline instantly. Just tap the ✨ Magic button in the navigation bar and watch your day unfold.
+
 ## Features
 
 ### Core

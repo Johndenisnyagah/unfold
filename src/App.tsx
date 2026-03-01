@@ -319,281 +319,317 @@ function App() {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {view === 'calendar' ? (
-        <motion.div
-          key="calendar"
-          initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
-          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
-          transition={viewTransition}
-          className="app-container"
-          style={{
-            padding: '40px 16px',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center'
-          }}
-        >
-          <DateGrid
-            selectedDate={selectedDate}
-            onDateSelect={handleDateSelect}
-            dateProgress={dateProgress}
-          />
+    <>
+      <AnimatePresence mode="wait">
+        {view === 'calendar' ? (
+          <motion.div
+            key="calendar"
+            initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
+            transition={viewTransition}
+            className="app-container"
+            style={{
+              padding: '40px 16px',
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
+            }}
+          >
+            <DateGrid
+              selectedDate={selectedDate}
+              onDateSelect={handleDateSelect}
+              dateProgress={dateProgress}
+            />
 
-          <div style={{
-            position: 'fixed',
-            bottom: '40px',
-            right: '40px',
-            zIndex: 100
-          }}>
-            <button
-              onClick={() => setIsSettingsOpen(true)}
+            <div style={{
+              position: 'fixed',
+              bottom: '40px',
+              right: '40px',
+              zIndex: 100,
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center'
+            }}>
+              <button
+                onClick={() => setIsAiModalOpen(true)}
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '28px',
+                  backgroundColor: 'var(--selection-bg)',
+                  border: 'none',
+                  color: 'var(--accent-orange-vibrant)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+                }}
+              >
+                <AiIcon size={24} />
+              </button>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '28px',
+                  backgroundColor: 'var(--selection-bg)',
+                  border: 'none',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+                }}
+              >
+                <Settings size={24} />
+              </button>
+            </div>
+
+            <SettingsPanel
+              isOpen={isSettingsOpen}
+              onClose={() => setIsSettingsOpen(false)}
+              events={events}
+              onImport={handleImportEvents}
+              onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
+              templates={templates}
+              onSaveTemplate={handleSaveTemplate}
+              onApplyTemplate={handleApplyTemplate}
+              onDeleteTemplate={handleDeleteTemplate}
+              theme={theme}
+              onThemeChange={handleThemeChange}
+            />
+
+            <AiPromptModal
+              isOpen={isAiModalOpen}
+              onClose={() => setIsAiModalOpen(false)}
+              onGenerate={handleAiGenerate}
+              isGenerating={isGeneratingAi}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="timeline"
+            initial={{ opacity: 0, x: 20, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, x: -20, filter: 'blur(10px)' }}
+            transition={viewTransition}
+            className="app-container"
+            style={{
+              padding: '40px 16px',
+              minHeight: '100vh',
+              position: 'relative',
+              zIndex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '24px'
+            }}
+          >
+            <div
+              onClick={() => setView('calendar')}
               style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '28px',
-                backgroundColor: 'var(--selection-bg)',
-                border: 'none',
-                color: 'var(--text-primary)',
+                padding: '20px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+                gap: '12px',
+                width: 'fit-content'
               }}
             >
-              <Settings size={24} />
-            </button>
-          </div>
-
-          <SettingsPanel
-            isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
-            events={events}
-            onImport={handleImportEvents}
-            onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
-            templates={templates}
-            onSaveTemplate={handleSaveTemplate}
-            onApplyTemplate={handleApplyTemplate}
-            onDeleteTemplate={handleDeleteTemplate}
-            theme={theme}
-            onThemeChange={handleThemeChange}
-          />
-        </motion.div>
-      ) : (
-        <motion.div
-          key="timeline"
-          initial={{ opacity: 0, x: 20, filter: 'blur(10px)' }}
-          animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, x: -20, filter: 'blur(10px)' }}
-          transition={viewTransition}
-          className="app-container"
-          style={{
-            padding: '40px 16px',
-            minHeight: '100vh',
-            position: 'relative',
-            zIndex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px'
-          }}
-        >
-          <div
-            onClick={() => setView('calendar')}
-            style={{
-              padding: '20px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              width: 'fit-content'
-            }}
-          >
-            <div style={{ fontSize: '48px', fontWeight: '800' }}>{selectedDate.getDate()}</div>
-            <div>
-              <div style={{ fontWeight: '700', textTransform: 'uppercase' }}>{selectedDate.toLocaleDateString('en-US', { month: 'short' })}</div>
-              <div style={{ opacity: 0.6 }}>{selectedDate.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-            </div>
-          </div>
-
-          <div style={{ position: 'relative', flexGrow: 1, marginLeft: '40px' }}>
-            <div style={{
-              position: 'absolute',
-              left: '24px',
-              top: `${START_OFFSET - 40}px`,
-              width: '24px',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 2
-            }}>
-              <Sun size={20} style={{ opacity: 0.6 }} />
-            </div>
-
-            <div style={{
-              position: 'absolute',
-              left: '36px',
-              top: `${START_OFFSET - 20}px`,
-              height: `${events.length * (CARD_HEIGHT + CARD_GAP) + 40}px`,
-              width: '2px',
-              backgroundColor: 'var(--spine-gray)',
-              zIndex: 0
-            }}></div>
-
-            <CurrentTimeLine top={currentTimeTop} />
-
-            <AnimatePresence>
-              {Array.from(new Set(events.map(e => parseInt(e.startTime.split(':')[0])))).sort((a, b) => a - b).map(hour => {
-                const y = getTimeY(`${String(hour).padStart(2, '0')}:00`);
-                if (y < START_OFFSET) return null;
-                return (
-                  <motion.div
-                    key={hour}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 0.35, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    style={{
-                      position: 'absolute',
-                      left: '-32px',
-                      top: `${y}px`,
-                      color: 'var(--text-secondary)',
-                      fontWeight: 'bold',
-                      fontSize: '38px',
-                      transform: 'translateY(-50%)',
-                      letterSpacing: '-0.02em',
-                      zIndex: 1
-                    }}
-                  >
-                    {String(hour).padStart(2, '0')}
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-
-            <div className="events-list" style={{
-              paddingTop: `${START_OFFSET}px`,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: `${CARD_GAP}px`
-            }}>
-              <AnimatePresence mode="popLayout">
-                {events.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    hasConflict={checkConflict(event, events)}
-                    onToggle={toggleEvent}
-                    onDelete={deleteEvent}
-                    onEdit={startEdit}
-                  />
-                ))}
-              </AnimatePresence>
-
-              <div style={{
-                marginTop: '40px',
-                marginLeft: '48px',
-                width: 'calc(100% - 48px)',
-                zIndex: 100,
-              }}>
-                <PillNav items={[
-                  {
-                    id: 'calendar',
-                    label: 'Calendar',
-                    icon: Calendar,
-                    onClick: () => setView('calendar')
-                  },
-                  {
-                    id: 'create',
-                    label: 'Create',
-                    icon: Plus,
-                    onClick: () => { setEditingEvent(null); setIsModalOpen(true); }
-                  },
-                  {
-                    id: 'clear',
-                    label: 'Clear',
-                    icon: Trash2,
-                    onClick: clearEvents,
-                    destructive: true
-                  },
-                  {
-                    id: 'magic',
-                    label: 'Magic',
-                    icon: AiIcon as any,
-                    onClick: () => setIsAiModalOpen(true),
-                    color: 'var(--accent-orange-vibrant)'
-                  },
-                  {
-                    id: 'settings',
-                    label: 'Settings',
-                    icon: Settings,
-                    onClick: () => setIsSettingsOpen(true)
-                  }
-                ]} />
+              <div style={{ fontSize: '48px', fontWeight: '800' }}>{selectedDate.getDate()}</div>
+              <div>
+                <div style={{ fontWeight: '700', textTransform: 'uppercase' }}>{selectedDate.toLocaleDateString('en-US', { month: 'short' })}</div>
+                <div style={{ opacity: 0.6 }}>{selectedDate.toLocaleDateString('en-US', { weekday: 'short' })}</div>
               </div>
             </div>
 
-            <motion.div
-              layout
-              style={{
+            <div style={{ position: 'relative', flexGrow: 1, marginLeft: '40px' }}>
+              <div style={{
                 position: 'absolute',
                 left: '24px',
-                top: `${events.length * (CARD_HEIGHT + CARD_GAP) + START_OFFSET}px`,
+                top: `${START_OFFSET - 40}px`,
                 width: '24px',
                 height: '40px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 zIndex: 2
-              }}
-            >
-              <Moon size={20} style={{ opacity: 0.6 }} />
-            </motion.div>
-          </div>
+              }}>
+                <Sun size={20} style={{ opacity: 0.6 }} />
+              </div>
 
+              <div style={{
+                position: 'absolute',
+                left: '36px',
+                top: `${START_OFFSET - 20}px`,
+                height: `${events.length * (CARD_HEIGHT + CARD_GAP) + 40}px`,
+                width: '2px',
+                backgroundColor: 'var(--spine-gray)',
+                zIndex: 0
+              }}></div>
+
+              <CurrentTimeLine top={currentTimeTop} />
+
+              <AnimatePresence>
+                {Array.from(new Set(events.map(e => parseInt(e.startTime.split(':')[0])))).sort((a, b) => a - b).map(hour => {
+                  const y = getTimeY(`${String(hour).padStart(2, '0')}:00`);
+                  if (y < START_OFFSET) return null;
+                  return (
+                    <motion.div
+                      key={hour}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 0.35, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      style={{
+                        position: 'absolute',
+                        left: '-32px',
+                        top: `${y}px`,
+                        color: 'var(--text-secondary)',
+                        fontWeight: 'bold',
+                        fontSize: '38px',
+                        transform: 'translateY(-50%)',
+                        letterSpacing: '-0.02em',
+                        zIndex: 1
+                      }}
+                    >
+                      {String(hour).padStart(2, '0')}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+
+              <div className="events-list" style={{
+                paddingTop: `${START_OFFSET}px`,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: `${CARD_GAP}px`
+              }}>
+                <AnimatePresence mode="popLayout">
+                  {events.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      hasConflict={checkConflict(event, events)}
+                      onToggle={toggleEvent}
+                      onDelete={deleteEvent}
+                      onEdit={startEdit}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              <motion.div
+                layout
+                style={{
+                  position: 'absolute',
+                  left: '24px',
+                  top: `${events.length * (CARD_HEIGHT + CARD_GAP) + START_OFFSET}px`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  zIndex: 2,
+                  paddingBottom: '100px',
+                }}
+              >
+                <Moon size={20} style={{ opacity: 0.6 }} />
+                <span style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap'
+                }}>
+                  End of day: {timeLeft}
+                </span>
+              </motion.div>
+            </div>
+
+            <AddEventModal
+              isOpen={isModalOpen}
+              onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
+              onAdd={handleAddOrUpdateEvent}
+              eventToEdit={editingEvent}
+              theme={theme}
+            />
+
+            <SettingsPanel
+              isOpen={isSettingsOpen}
+              onClose={() => setIsSettingsOpen(false)}
+              events={events}
+              onImport={handleImportEvents}
+              onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
+              templates={templates}
+              onSaveTemplate={handleSaveTemplate}
+              onApplyTemplate={handleApplyTemplate}
+              onDeleteTemplate={handleDeleteTemplate}
+              theme={theme}
+              onThemeChange={setTheme}
+            />
+
+            <AiPromptModal
+              isOpen={isAiModalOpen}
+              onClose={() => setIsAiModalOpen(false)}
+              onGenerate={handleAiGenerate}
+              isGenerating={isGeneratingAi}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fixed Bottom Navigation */}
+      {
+        view === 'timeline' && (
           <div style={{
-            marginLeft: '100px',
-            marginTop: '60px',
-            color: 'var(--text-secondary)',
-            fontSize: '15px',
-            paddingBottom: '40px',
+            position: 'fixed',
+            bottom: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '100%',
+            maxWidth: '428px',
+            padding: '12px 20px 24px',
+            zIndex: 500,
+            background: 'linear-gradient(transparent, var(--bg-black) 40%)',
           }}>
-            <p>End of day: {timeLeft}</p>
+            <PillNav items={[
+              {
+                id: 'calendar',
+                label: 'Calendar',
+                icon: Calendar,
+                onClick: () => setView('calendar')
+              },
+              {
+                id: 'create',
+                label: 'Create',
+                icon: Plus,
+                onClick: () => { setEditingEvent(null); setIsModalOpen(true); }
+              },
+              {
+                id: 'clear',
+                label: 'Clear',
+                icon: Trash2,
+                onClick: clearEvents,
+                destructive: true
+              },
+              {
+                id: 'magic',
+                label: 'Magic',
+                icon: AiIcon as any,
+                onClick: () => setIsAiModalOpen(true),
+                color: 'var(--accent-orange-vibrant)'
+              },
+              {
+                id: 'settings',
+                label: 'Settings',
+                icon: Settings,
+                onClick: () => setIsSettingsOpen(true)
+              }
+            ]} />
           </div>
-
-          <AddEventModal
-            isOpen={isModalOpen}
-            onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
-            onAdd={handleAddOrUpdateEvent}
-            eventToEdit={editingEvent}
-            theme={theme}
-          />
-
-          <SettingsPanel
-            isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
-            events={events}
-            onImport={handleImportEvents}
-            onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
-            templates={templates}
-            onSaveTemplate={handleSaveTemplate}
-            onApplyTemplate={handleApplyTemplate}
-            onDeleteTemplate={handleDeleteTemplate}
-            theme={theme}
-            onThemeChange={setTheme}
-          />
-
-          <AiPromptModal
-            isOpen={isAiModalOpen}
-            onClose={() => setIsAiModalOpen(false)}
-            onGenerate={handleAiGenerate}
-            isGenerating={isGeneratingAi}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+    </>
   );
 }
 
