@@ -15,8 +15,13 @@ export async function generateTimelineEvents(prompt: string): Promise<TimelineEv
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
     if (!apiKey || apiKey === 'your_key_here') {
-        console.error("VITE_GEMINI_API_KEY is missing or invalid in .env");
-        throw new Error("Missing API Key");
+        const isProduction = import.meta.env.PROD;
+        const errorMessage = isProduction
+            ? "VITE_GEMINI_API_KEY is missing. Please ensure it's added to your Vercel Environment Variables."
+            : "VITE_GEMINI_API_KEY is missing or invalid in .env";
+
+        console.error(errorMessage);
+        throw new Error(errorMessage);
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
