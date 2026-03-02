@@ -2,13 +2,15 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const ICON_NAMES = [
-    "Check", "Briefcase", "Coffee", "Dumbbell", "User", "Heart",
-    "Plane", "Zap", "Star", "Flame", "Moon", "Sun"
+    "dumbbell", "bath", "coffee", "mail", "star", "book", "heart", "utensils",
+    "laptop", "car", "smartphone", "glass-water", "users", "music", "Activity",
+    "Code", "MessageSquare", "Target"
 ];
 
 const COLORS = [
-    "#007AFF", "#34C759", "#FF9500", "#FF3B30", "#AF52DE", "#5856D6",
-    "#FF2D55", "#FFD60A", "#64D2FF", "#00C7BE", "#DA8FFF"
+    "#ff2d55", "#007aff", "#ff9500", "#af52de", "#34c759", "#5856d6",
+    "#af52de", "#ff3b30", "#ffcc00", "#34c759", "#5ac8fa", "#ff9500",
+    "#8e8e93", "#ff2d55"
 ];
 
 /**

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, type FC } from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { TimelineEvent } from '../types';
 import { ICON_MAP } from '../utils/icons';
 
@@ -41,6 +42,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
     const [endTime, setEndTime] = useState('10:00');
     const [iconName, setIconName] = useState(ICONS[0]);
     const [color, setColor] = useState(COLORS[0]);
+    const [showAllIcons, setShowAllIcons] = useState(false);
+    const [showAllColors, setShowAllColors] = useState(false);
 
     useEffect(() => {
         if (eventToEdit) {
@@ -142,8 +145,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                         />
                     </div>
 
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                        <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ flex: '1 1 160px' }}>
                             <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '14px' }}>START TIME</label>
                             <input
                                 type="time"
@@ -162,7 +165,7 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                 }}
                             />
                         </div>
-                        <div style={{ flex: 1 }}>
+                        <div style={{ flex: '1 1 160px' }}>
                             <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '14px' }}>END TIME</label>
                             <input
                                 type="time"
@@ -185,60 +188,120 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
 
                     <div>
                         <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '12px', fontSize: '14px' }}>ICON</label>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
-                            gap: '12px'
-                        }}>
-                            {ICONS.map(icon => (
-                                <button
-                                    key={icon}
-                                    type="button"
-                                    onClick={() => setIconName(icon)}
-                                    style={{
-                                        width: '44px',
-                                        height: '44px',
-                                        borderRadius: '12px',
-                                        backgroundColor: iconName === icon ? color : (theme === 'light' ? '#ffffff' : 'var(--selection-bg)'),
-                                        border: iconName === icon ? 'none' : (theme === 'light' ? '1px solid var(--border-subtle)' : 'none'),
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                        color: iconName === icon ? 'white' : 'var(--text-primary)',
-                                    }}
-                                >
-                                    {React.cloneElement(ICON_MAP[icon] as React.ReactElement<{ size: number }>, { size: 20 })}
-                                </button>
-                            ))}
-                        </div>
+                        <motion.div
+                            layout
+                            style={{ overflow: 'hidden' }}
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        >
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
+                                gap: '12px',
+                                paddingBottom: '4px'
+                            }}>
+                                {ICONS.slice(0, showAllIcons ? undefined : 6).map(icon => (
+                                    <motion.button
+                                        layout
+                                        key={icon}
+                                        type="button"
+                                        onClick={() => setIconName(icon)}
+                                        style={{
+                                            width: '44px',
+                                            height: '44px',
+                                            borderRadius: '12px',
+                                            backgroundColor: iconName === icon ? color : (theme === 'light' ? '#ffffff' : 'var(--selection-bg)'),
+                                            border: iconName === icon ? 'none' : (theme === 'light' ? '1px solid var(--border-subtle)' : 'none'),
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.2s, color 0.2s',
+                                            color: iconName === icon ? 'white' : 'var(--text-primary)',
+                                        }}
+                                    >
+                                        {React.cloneElement(ICON_MAP[icon] as React.ReactElement<{ size: number }>, { size: 20 })}
+                                    </motion.button>
+                                ))}
+                            </div>
+                        </motion.div>
+                        <button
+                            type="button"
+                            onClick={() => setShowAllIcons(!showAllIcons)}
+                            style={{
+                                marginTop: '12px',
+                                background: 'none',
+                                border: '1px solid var(--border-subtle)',
+                                borderRadius: '12px',
+                                padding: '8px 12px',
+                                color: 'var(--text-secondary)',
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                width: 'fit-content',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {showAllIcons ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                            {showAllIcons ? 'Show Less' : `Show More (${ICONS.length - 6} more)`}
+                        </button>
                     </div>
 
                     <div>
                         <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '12px', fontSize: '14px' }}>COLOR</label>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
-                            gap: '12px'
-                        }}>
-                            {COLORS.map(c => (
-                                <button
-                                    key={c}
-                                    type="button"
-                                    onClick={() => setColor(c)}
-                                    style={{
-                                        width: '44px',
-                                        height: '44px',
-                                        borderRadius: '50%',
-                                        backgroundColor: c,
-                                        border: color === c ? '3px solid var(--text-primary)' : '3px solid transparent',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                    }}
-                                />
-                            ))}
-                        </div>
+                        <motion.div
+                            layout
+                            style={{ overflow: 'hidden' }}
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        >
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
+                                gap: '12px',
+                                paddingBottom: '4px'
+                            }}>
+                                {COLORS.slice(0, showAllColors ? undefined : 6).map(c => (
+                                    <motion.button
+                                        layout
+                                        key={c}
+                                        type="button"
+                                        onClick={() => setColor(c)}
+                                        style={{
+                                            width: '44px',
+                                            height: '44px',
+                                            borderRadius: '50%',
+                                            backgroundColor: c,
+                                            border: color === c ? '3px solid var(--text-primary)' : '3px solid transparent',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.2s, border 0.2s',
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </motion.div>
+                        <button
+                            type="button"
+                            onClick={() => setShowAllColors(!showAllColors)}
+                            style={{
+                                marginTop: '12px',
+                                background: 'none',
+                                border: '1px solid var(--border-subtle)',
+                                borderRadius: '12px',
+                                padding: '8px 12px',
+                                color: 'var(--text-secondary)',
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                width: 'fit-content',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {showAllColors ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                            {showAllColors ? 'Show Less' : `Show More (${COLORS.length - 6} more)`}
+                        </button>
                     </div>
 
                     <button

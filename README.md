@@ -58,8 +58,12 @@ A high-fidelity, personal daily timeline application with a premium aesthetic an
 
 ```bash
 npm install
-npm run dev
+npm run dev # Basic frontend development
+# OR
+npm run dev:vercel # Recommended for AI features (requires Vercel CLI)
 ```
+
+> 💡 **Note**: The "Magic Timeline" (AI feature) uses serverless functions in the `api/` directory. For these to work locally, you should use `vercel dev`. If you don't have the Vercel CLI, install it with `npm install -g vercel`.
 
 Open the provided local URL in your browser.
 
