@@ -7,6 +7,10 @@ interface DateGridProps {
     dateProgress?: Record<string, number>;
 }
 
+/**
+ * Premium circular date grid component.
+ * Displays a full month view with progress rings and pulsing "today" animation.
+ */
 const DateGrid: React.FC<DateGridProps> = ({ selectedDate, onDateSelect, dateProgress = {} }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

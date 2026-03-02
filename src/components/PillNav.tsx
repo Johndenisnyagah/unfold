@@ -16,6 +16,10 @@ interface PillNavProps {
     items: NavItem[];
 }
 
+/**
+ * Sleek bottom navigation bar component.
+ * Features glassmorphic background and spring-based background pill transitions.
+ */
 const PillNav: React.FC<PillNavProps> = ({ items }) => {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 

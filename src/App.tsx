@@ -15,7 +15,13 @@ import { Sun, Moon, Plus, Trash2, Settings, Calendar } from 'lucide-react';
 
 import { initialEvents, CARD_HEIGHT, CARD_GAP, START_OFFSET } from './constants';
 
+/**
+ * Main Application Component
+ * Manages global state including events, themes, templates, and view transitions.
+ * Features a unique "Liquid Timeline" with non-linear time-to-Y mapping.
+ */
 function App() {
+  // State for all events, keyed by date string (YYYY-MM-DD)
   const [allEvents, setAllEvents] = useState<Record<string, TimelineEvent[]>>(() => {
     const saved = loadEvents();
     if (saved) return saved;
@@ -24,9 +30,12 @@ function App() {
     const today = new Date().toISOString().split('T')[0];
     return { [today]: initialEvents };
   });
+
+  // State for user-defined reusable daily templates
   const [templates, setTemplates] = useState<DailyTemplate[]>(() => {
     return loadTemplates() || [];
   });
+
   const [timeLeft, setTimeLeft] = useState('');
   const [currentTimeTop, setCurrentTimeTop] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -95,21 +104,29 @@ function App() {
     return [...evs].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
   };
 
-  // The Magic Logic: Non-Linear Mapping
+  /**
+   * The "Magic" Logic: Non-Linear Mapping
+   * Converts a time string (HH:mm) into a vertical Y coordinate.
+   * Ensures that cards are spaced evenly regardless of the actual time duration between them,
+   * while still maintaining mathematical accuracy within gaps.
+   * 
+   * @param timeStr - Time in "HH:mm" format
+   * @returns Y pixel coordinate on the timeline
+   */
   const getTimeY = (timeStr: string | undefined): number => {
     if (events.length === 0 || !timeStr) return START_OFFSET;
 
     const m = timeToMinutes(timeStr);
     const sortedEvents = sortEvents(events);
 
-    // 1. Before first event?
+    // 1. Logic for time before the first event of the day
     const firstEvent = sortedEvents[0];
     const firstS = timeToMinutes(firstEvent.startTime);
     if (m <= firstS) {
       return START_OFFSET - (firstS - m);
     }
 
-    // 2. Iterate through events and gaps
+    // 2. Iterate through events and gaps to find where the time falls
     for (let i = 0; i < sortedEvents.length; i++) {
       const event = sortedEvents[i];
       const s = timeToMinutes(event.startTime);
@@ -117,11 +134,13 @@ function App() {
       const yStart = i * (CARD_HEIGHT + CARD_GAP) + START_OFFSET;
       const yEnd = yStart + CARD_HEIGHT;
 
+      // Time is within an actual event block
       if (m >= s && m <= e) {
         const progress = (m - s) / (e - s || 1);
         return yStart + progress * CARD_HEIGHT;
       }
 
+      // Time is in a gap between two events
       if (i < sortedEvents.length - 1) {
         const nextEvent = sortedEvents[i + 1];
         const nextS = timeToMinutes(nextEvent.startTime);
@@ -132,7 +151,7 @@ function App() {
       }
     }
 
-    // 3. After last event?
+    // 3. Logic for time after the last event of the day
     const lastEvent = sortedEvents[sortedEvents.length - 1];
     const lastE = timeToMinutes(lastEvent.endTime);
     const lastYEnd = (sortedEvents.length - 1) * (CARD_HEIGHT + CARD_GAP) + START_OFFSET + CARD_HEIGHT;
@@ -176,6 +195,10 @@ function App() {
     }));
   };
 
+  /**
+   * Adds or updates an event in the current date's timeline.
+   * Ensures UI remains solid by updating the global state and persisting to localStorage.
+   */
   const handleAddOrUpdateEvent = (event: TimelineEvent) => {
     setAllEvents(prev => {
       const currentDayEvents = prev[dateKey] || [];
@@ -215,6 +238,10 @@ function App() {
     setAllEvents(prev => ({ ...prev, [dateKey]: sortEvents(newEvents) }));
   };
 
+  /**
+   * Generates a complete daily timeline using Google Gemini AI.
+   * Parses natural language input into structured TimelineEvent objects.
+   */
   const handleAiGenerate = async (prompt: string) => {
     try {
       setIsGeneratingAi(true);

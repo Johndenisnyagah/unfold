@@ -1,8 +1,11 @@
 import type { TimelineEvent } from './types';
 
-export const CARD_HEIGHT = 120;
-export const CARD_GAP = 20;
-export const START_OFFSET = 40;
+/**
+ * Global UI layout constants for the Liquid Timeline.
+ */
+export const CARD_HEIGHT = 120; // Height of an event card in pixels
+export const CARD_GAP = 20;     // Gap between cards in pixels
+export const START_OFFSET = 40; // Initial top padding on the timeline
 
 export const initialEvents: TimelineEvent[] = [
     {

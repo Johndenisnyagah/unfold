@@ -30,6 +30,11 @@ const COLORS = [
 
 const ICONS = Object.keys(ICON_MAP);
 
+/**
+ * Modal component for creating or editing timeline events.
+ * Features a solid background, responsive grid for icons/colors,
+ * and specialized theme handling for premium light/dark modes.
+ */
 const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventToEdit, theme }) => {
     const [title, setTitle] = useState('');
     const [startTime, setStartTime] = useState('09:00');

@@ -1,5 +1,9 @@
 import type { TimelineEvent } from "../types";
 
+/**
+ * Client-side AI utility for timeline generation.
+ * Communicates with the proxy API to securely generate events.
+ */
 export async function generateTimelineEvents(prompt: string): Promise<TimelineEvent[]> {
     try {
         const response = await fetch("/api/generate", {

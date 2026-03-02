@@ -70,7 +70,7 @@ To enable the Magic Timeline feature, you need a Gemini API key:
 1.  **Get a API Key**: Visit [Google AI Studio](https://aistudio.google.com/apikey) and create a free key.
 2.  **Local Setup**: Create a `.env` file in the project root:
     ```env
-    VITE_GEMINI_API_KEY=your_gemini_api_key_here
+    GEMINI_API_KEY=your_gemini_api_key_here
     ```
 3.  **Vercel / Production Setup**: If you are deploying to Vercel, you must add the environment variable in your dashboard.
     *   👉 **Follow the [Vercel Setup Guide](vercel_setup.md)** for step-by-step instructions.

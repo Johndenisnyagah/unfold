@@ -13,6 +13,11 @@ interface EventCardProps {
 
 import { ICON_MAP } from '../utils/icons';
 
+/**
+ * Individual event card displayed on the timeline.
+ * Features staggered entrance animations, theme-adaptive icons,
+ * and conflict indicators.
+ */
 const EventCard: FC<EventCardProps> = ({ event, hasConflict = false, onToggle, onEdit, onDelete }) => {
     const icon = ICON_MAP[event.iconName] || <Check size={20} color="currentColor" />;
 

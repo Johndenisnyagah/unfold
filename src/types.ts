@@ -1,3 +1,10 @@
+/**
+ * Core data structures for the Unfold application.
+ */
+
+/**
+ * Represents a single task or event on the timeline.
+ */
 export interface TimelineEvent {
   id: string;
   title: string;

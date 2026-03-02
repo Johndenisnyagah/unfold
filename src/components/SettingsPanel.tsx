@@ -16,6 +16,10 @@ interface SettingsPanelProps {
     onThemeChange: (theme: 'dark' | 'light') => void;
 }
 
+/**
+ * Frosted-glass settings overlay component.
+ * Manages daily templates, data export/import, and theme switching.
+ */
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
     isOpen,
     onClose,

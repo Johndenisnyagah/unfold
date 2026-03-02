@@ -11,6 +11,10 @@ const COLORS = [
     "#FF2D55", "#FFD60A", "#64D2FF", "#00C7BE", "#DA8FFF"
 ];
 
+/**
+ * Serverless function for AI-powered timeline generation.
+ * Integrates with Google Gemini API to parse natural language into structured events.
+ */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Only allow POST requests
     if (req.method !== "POST") {

@@ -1,5 +1,9 @@
 import { Dumbbell, Bath, Coffee, Mail, Star, Book, Heart, Utensils, Laptop, Car, Smartphone, GlassWater, Users, Music, Activity, Code, MessageSquare, Target } from 'lucide-react';
 
+/**
+ * Central registry for all application icons.
+ * Maps logical names to Lucide icon components with theme-adaptive colors.
+ */
 export const ICON_MAP: Record<string, React.ReactNode> = {
     'dumbbell': <Dumbbell size={20} color="currentColor" />,
     'bath': <Bath size={20} color="currentColor" />,

@@ -3,6 +3,10 @@ import type { TimelineEvent, DailyTemplate } from '../types';
 const STORAGE_KEY = 'unfold_events';
 const TEMPLATE_KEY = 'unfold_templates';
 
+/**
+ * LocalStorage management utilities.
+ * Handles persistence for events, templates, and theme preferences.
+ */
 export const saveEvents = (events: Record<string, TimelineEvent[]>) => {
     try {
         const serializedEvents = JSON.stringify(events);
