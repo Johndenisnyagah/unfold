@@ -10,6 +10,10 @@ interface AiPromptModalProps {
     isGenerating: boolean;
 }
 
+/**
+ * Modal component for entering AI prompts.
+ * Allows users to describe their day and trigger timeline generation.
+ */
 const AiPromptModal: FC<AiPromptModalProps> = ({ isOpen, onClose, onGenerate, isGenerating }) => {
     const [prompt, setPrompt] = useState('');
 
