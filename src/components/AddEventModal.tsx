@@ -98,14 +98,12 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                 style={{
                     width: '100%',
                     maxWidth: '430px', // Mobile width
-                    backgroundColor: 'var(--card-bg-translucent)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
+                    backgroundColor: 'var(--card-bg)', // Solid background
                     borderRadius: '24px',
                     padding: '24px',
-                    maxHeight: '80vh',
+                    maxHeight: '85vh',
                     overflowY: 'auto',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                    boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
                     border: '1px solid var(--border-subtle)',
                 }}
             >
@@ -128,8 +126,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                             autoFocus
                             style={{
                                 width: '100%',
-                                backgroundColor: 'var(--selection-bg)',
-                                border: 'none',
+                                backgroundColor: theme === 'light' ? '#ffffff' : 'var(--selection-bg)',
+                                border: theme === 'light' ? '1px solid var(--border-subtle)' : 'none',
                                 borderRadius: '12px',
                                 padding: '16px',
                                 color: 'var(--text-primary)',
@@ -148,8 +146,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                 onChange={(e) => setStartTime(e.target.value)}
                                 style={{
                                     width: '100%',
-                                    backgroundColor: 'var(--selection-bg)',
-                                    border: 'none',
+                                    backgroundColor: theme === 'light' ? '#ffffff' : 'var(--selection-bg)',
+                                    border: theme === 'light' ? '1px solid var(--border-subtle)' : 'none',
                                     borderRadius: '12px',
                                     padding: '16px',
                                     color: 'var(--text-primary)',
@@ -167,8 +165,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                 onChange={(e) => setEndTime(e.target.value)}
                                 style={{
                                     width: '100%',
-                                    backgroundColor: 'var(--selection-bg)',
-                                    border: 'none',
+                                    backgroundColor: theme === 'light' ? '#ffffff' : 'var(--selection-bg)',
+                                    border: theme === 'light' ? '1px solid var(--border-subtle)' : 'none',
                                     borderRadius: '12px',
                                     padding: '16px',
                                     color: 'var(--text-primary)',
@@ -182,7 +180,11 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
 
                     <div>
                         <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '12px', fontSize: '14px' }}>ICON</label>
-                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
+                            gap: '12px'
+                        }}>
                             {ICONS.map(icon => (
                                 <button
                                     key={icon}
@@ -192,13 +194,14 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                         width: '44px',
                                         height: '44px',
                                         borderRadius: '12px',
-                                        backgroundColor: iconName === icon ? color : 'var(--selection-bg)',
-                                        border: 'none',
+                                        backgroundColor: iconName === icon ? color : (theme === 'light' ? '#ffffff' : 'var(--selection-bg)'),
+                                        border: iconName === icon ? 'none' : (theme === 'light' ? '1px solid var(--border-subtle)' : 'none'),
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
+                                        color: iconName === icon ? 'white' : 'var(--text-primary)',
                                     }}
                                 >
                                     {React.cloneElement(ICON_MAP[icon] as React.ReactElement<{ size: number }>, { size: 20 })}
@@ -209,7 +212,11 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
 
                     <div>
                         <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '12px', fontSize: '14px' }}>COLOR</label>
-                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
+                            gap: '12px'
+                        }}>
                             {COLORS.map(c => (
                                 <button
                                     key={c}

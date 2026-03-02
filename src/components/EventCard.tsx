@@ -14,7 +14,7 @@ interface EventCardProps {
 import { ICON_MAP } from '../utils/icons';
 
 const EventCard: FC<EventCardProps> = ({ event, hasConflict = false, onToggle, onEdit, onDelete }) => {
-    const icon = ICON_MAP[event.iconName] || <Check size={20} color="white" />;
+    const icon = ICON_MAP[event.iconName] || <Check size={20} color="currentColor" />;
 
     return (
         <motion.div
@@ -170,7 +170,8 @@ const EventCard: FC<EventCardProps> = ({ event, hasConflict = false, onToggle, o
                 zIndex: 2,
                 boxShadow: hasConflict ? '0 0 15px rgba(255, 59, 48, 0.4)' : 'none',
                 border: hasConflict ? '2px solid rgba(255, 59, 48, 0.8)' : 'none',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                color: 'white'
             }}>
                 {icon}
             </div>
