@@ -113,10 +113,13 @@ const DateGrid: React.FC<DateGridProps> = ({ selectedDate, onDateSelect, datePro
                     const circumference = 2 * Math.PI * radius;
                     const offset = circumference - (progress * circumference);
 
+                    // Show ring for: today (always), or past dates with progress
+                    const showRing = isCurrentMonth && (isToday || (isPast && progress > 0));
+
                     return (
                         <div key={i} style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
-                            {/* Progress Ring */}
-                            {isCurrentMonth && (isToday || isPast) && progress > 0 && (
+                            {/* Progress Ring / Today Pulse Ring */}
+                            {showRing && (
                                 <svg
                                     viewBox="0 0 50 50"
                                     style={{
@@ -129,6 +132,19 @@ const DateGrid: React.FC<DateGridProps> = ({ selectedDate, onDateSelect, datePro
                                         zIndex: 1
                                     }}
                                 >
+                                    {/* Background track ring for today */}
+                                    {isToday && (
+                                        <circle
+                                            cx="25"
+                                            cy="25"
+                                            r={radius}
+                                            fill="none"
+                                            stroke="var(--accent-orange-vibrant)"
+                                            strokeWidth="2.5"
+                                            opacity="0.15"
+                                            style={{ strokeDasharray: circumference }}
+                                        />
+                                    )}
                                     <motion.circle
                                         cx="25"
                                         cy="25"
@@ -139,7 +155,7 @@ const DateGrid: React.FC<DateGridProps> = ({ selectedDate, onDateSelect, datePro
                                         strokeLinecap="round"
                                         initial={{ strokeDashoffset: circumference }}
                                         animate={{
-                                            strokeDashoffset: offset,
+                                            strokeDashoffset: isToday && progress === 0 ? circumference : offset,
                                             scale: isToday ? [1, 1.08, 1] : 1,
                                             opacity: isToday ? [0.6, 1, 0.6] : 1
                                         }}
@@ -155,8 +171,20 @@ const DateGrid: React.FC<DateGridProps> = ({ selectedDate, onDateSelect, datePro
                                 </svg>
                             )}
 
-                            <button
+                            <motion.button
                                 onClick={() => onDateSelect(date)}
+                                animate={isToday && isCurrentMonth ? {
+                                    boxShadow: [
+                                        '0 0 0px rgba(255, 94, 0, 0)',
+                                        '0 0 12px rgba(255, 94, 0, 0.4)',
+                                        '0 0 0px rgba(255, 94, 0, 0)'
+                                    ]
+                                } : {}}
+                                transition={isToday && isCurrentMonth ? {
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: 'easeInOut'
+                                } : {}}
                                 style={{
                                     width: '100%',
                                     height: '100%',
@@ -185,7 +213,7 @@ const DateGrid: React.FC<DateGridProps> = ({ selectedDate, onDateSelect, datePro
                                         }}
                                     />
                                 )}
-                            </button>
+                            </motion.button>
                         </div>
                     );
                 })}
