@@ -64,6 +64,26 @@ const AddEventModal: FC<AddEventModalProps> = ({ onClose, onAdd, eventToEdit, th
         }
     }, [eventToEdit]);
 
+    const formatTo12H = (time24h: string) => {
+        if (!time24h) return '';
+        const [h, m] = time24h.split(':').map(Number);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+    };
+
+    const getDurationLabel = (start: string, end: string) => {
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        let diff = (eh * 60 + em) - (sh * 60 + sm);
+        if (diff < 0) diff += 24 * 60; // Handle overnight
+
+        const hrs = Math.floor(diff / 60);
+        const mins = diff % 60;
+        if (hrs > 0) return `${hrs}h ${mins}m`;
+        return `${mins}m`;
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!title) return;
@@ -155,50 +175,125 @@ const AddEventModal: FC<AddEventModalProps> = ({ onClose, onAdd, eventToEdit, th
                         />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '14px' }}>START TIME</label>
-                            <input
-                                type="time"
-                                value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    backgroundColor: theme === 'light' ? '#ffffff' : 'var(--selection-bg)',
-                                    border: theme === 'light' ? '1px solid var(--border-subtle)' : 'none',
-                                    borderRadius: '12px',
-                                    padding: '16px',
-                                    paddingLeft: '12px', // Tighter for mobile
-                                    paddingRight: '12px', // Tighter for mobile
-                                    color: 'var(--text-primary)',
-                                    fontSize: '16px',
-                                    outline: 'none',
-                                    colorScheme: theme === 'light' ? 'light' : 'dark',
-                                    minWidth: 0, // Prevent overflow
-                                }}
-                            />
+                    {/* New Time Ruler Selector */}
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <label style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>TIME</label>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '14px' }}>END TIME</label>
-                            <input
-                                type="time"
-                                value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    backgroundColor: theme === 'light' ? '#ffffff' : 'var(--selection-bg)',
-                                    border: theme === 'light' ? '1px solid var(--border-subtle)' : 'none',
-                                    borderRadius: '12px',
-                                    padding: '16px',
-                                    paddingLeft: '12px', // Tighter for mobile
-                                    paddingRight: '12px', // Tighter for mobile
-                                    color: 'var(--text-primary)',
-                                    fontSize: '16px',
-                                    outline: 'none',
-                                    colorScheme: theme === 'light' ? 'light' : 'dark',
-                                    minWidth: 0, // Prevent overflow
-                                }}
-                            />
+                        
+                        <div style={{ 
+                            position: 'relative',
+                            backgroundColor: theme === 'light' ? '#ffffff' : 'var(--selection-bg)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: '16px',
+                            padding: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            minHeight: '72px'
+                        }}>
+                            {/* Start Time Box */}
+                            <div style={{ position: 'relative', flex: '0 0 auto' }}>
+                                <div style={{
+                                    backgroundColor: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: '10px',
+                                    padding: '8px 12px',
+                                    minWidth: '80px',
+                                    textAlign: 'center',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    fontFamily: 'monospace',
+                                    color: 'var(--text-primary)'
+                                }}>
+                                    {formatTo12H(startTime)}
+                                </div>
+                                <input
+                                    type="time"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
+                                    style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        opacity: 0,
+                                        cursor: 'pointer'
+                                    }}
+                                />
+                            </div>
+
+                            {/* Ruler Track */}
+                            <div style={{ 
+                                flex: 1, 
+                                height: '24px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'space-around',
+                                position: 'relative'
+                            }}>
+                                {[...Array(16)].map((_, i) => (
+                                    <div 
+                                        key={i} 
+                                        style={{ 
+                                            width: '2px', 
+                                            height: i % 4 === 0 ? '16px' : '8px', 
+                                            backgroundColor: 'var(--border-subtle)',
+                                            opacity: 0.4
+                                        }} 
+                                    />
+                                ))}
+
+                                {/* Duration Pill */}
+                                <motion.div
+                                    layoutId="duration-pill"
+                                    style={{
+                                        position: 'absolute',
+                                        top: '-28px',
+                                        left: '50%',
+                                        x: '-50%',
+                                        backgroundColor: '#E5765C',
+                                        color: '#FFFFFF',
+                                        padding: '4px 12px',
+                                        borderRadius: '20px',
+                                        fontSize: '11px',
+                                        fontWeight: 'bold',
+                                        boxShadow: '0 4px 12px rgba(229, 118, 92, 0.3)',
+                                        whiteSpace: 'nowrap',
+                                        zIndex: 2,
+                                        userSelect: 'none'
+                                    }}
+                                >
+                                    {getDurationLabel(startTime, endTime)}
+                                </motion.div>
+                            </div>
+
+                            {/* End Time Box */}
+                            <div style={{ position: 'relative', flex: '0 0 auto' }}>
+                                <div style={{
+                                    backgroundColor: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: '10px',
+                                    padding: '8px 12px',
+                                    minWidth: '80px',
+                                    textAlign: 'center',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    fontFamily: 'monospace',
+                                    color: 'var(--text-primary)'
+                                }}>
+                                    {formatTo12H(endTime)}
+                                </div>
+                                <input
+                                    type="time"
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
+                                    style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        opacity: 0,
+                                        cursor: 'pointer'
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
 
