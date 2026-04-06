@@ -31,19 +31,21 @@ A high-fidelity, personal daily timeline application with a premium aesthetic an
 
 ### Navigation & UI
 - **Premium View Transitions**: Smooth blur, scale, and slide transitions between calendar and timeline views powered by Framer Motion.
+- **Blurry Fade Animations**: Specialized "blooming" transitions for icon and color selection grids using opacity, scale, and Gaussian blur for a high-end feel.
 - **Circular Reveal Theme Switch**: Switching between Dark and Light modes triggers a sophisticated circular reveal animation using the View Transitions API.
 - **Glassmorphic Settings**: A frosted-glass settings overlay with strict mobile stability (no jitter, locked background scrolling).
 - **Pill Navigation**: A sleek bottom navigation bar with animated hover states and spring-based pill transitions.
 - **Staggered Animations**: Cards animate in on scroll with blur and slide transitions.
-- **Mobile Optimized**: Compressed timeline gutter for maximum card width on smaller screens.
+- **Mobile Optimized**: Top-weighted stable modals and responsive grid layouts (iPhone 12 Pro Max optimized) for time selectors and grid inputs.
 
-### Themes
+### Themes & Branding
+- **New Premium Identity**: Featuring a sleek, dark monochromatic "Unfold" logo variant for a refined professional aesthetic.
 - **Dark Mode**: A rich, high-contrast dark theme with vibrant orange accents.
 - **Light Mode**: A clean white theme with precise, theme-aware variables for overlays, borders, and inputs.
 
 ### Platform
 - **PWA Support**: Installable on mobile and desktop with offline caching via Service Worker.
-- **Responsive**: Optimized for mobile (iPhone 12 Pro Max) and desktop viewports.
+- **Responsive**: Deeply optimized for mobile (iPhone 12 Pro Max) and desktop viewports, ensuring zero horizontal overflow and stable layouts.
 
 ## Tech Stack
 

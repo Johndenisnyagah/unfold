@@ -1,11 +1,10 @@
 import React, { useState, useEffect, type FC } from 'react';
 import { X, Check, ChevronDown, ChevronUp } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { TimelineEvent } from '../types';
 import { ICON_MAP } from '../utils/icons';
 
 interface AddEventModalProps {
-    isOpen: boolean;
     onClose: () => void;
     onAdd: (event: TimelineEvent) => void;
     eventToEdit?: TimelineEvent | null;
@@ -13,20 +12,24 @@ interface AddEventModalProps {
 }
 
 const COLORS = [
-    'var(--accent-pink)',
-    'var(--accent-blue)',
-    'var(--accent-orange)',
-    'var(--accent-purple)',
-    'var(--accent-green)',
-    '#5856d6', // Indigo
-    '#af52de', // Purple
-    '#ff3b30', // Red
-    '#ffcc00', // Yellow
-    '#34c759', // Green
-    '#5ac8fa', // Sky Blue
-    '#ff9500', // Orange
-    '#8e8e93', // Grey
-    '#ff2d55', // Rose
+    '#C2D8C4',
+    '#102E4A',
+    '#004643',
+    '#205030',
+    '#B78E79',
+    '#414751',
+    '#919F90',
+    '#B0C0CC',
+    '#AE522F',
+    '#C3CAB5',
+    '#EFD17F',
+    '#8CBEBF',
+    '#344C4B',
+    '#3E241A',
+    '#A8622A',
+    '#4B607F',
+    '#2E211C',
+    '#DDC5A3',
 ];
 
 const ICONS = Object.keys(ICON_MAP);
@@ -36,7 +39,7 @@ const ICONS = Object.keys(ICON_MAP);
  * Features a solid background, responsive grid for icons/colors,
  * and specialized theme handling for premium light/dark modes.
  */
-const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventToEdit, theme }) => {
+const AddEventModal: FC<AddEventModalProps> = ({ onClose, onAdd, eventToEdit, theme }) => {
     const [title, setTitle] = useState('');
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('10:00');
@@ -59,9 +62,7 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
             setIconName(ICONS[0]);
             setColor(COLORS[0]);
         }
-    }, [eventToEdit, isOpen]);
-
-    if (!isOpen) return null;
+    }, [eventToEdit]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -88,20 +89,30 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center', // Centered
-            justifyContent: 'center',
-            padding: '20px',
-        }}>
-            <div
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                zIndex: 1000,
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'center',
+                padding: '20px',
+                paddingTop: '80px',
+                overflowY: 'auto',
+            }}
+        >
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 className="modal-content"
                 style={{
                     width: '100%',
@@ -109,8 +120,7 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                     backgroundColor: 'var(--card-bg)', // Solid background
                     borderRadius: '24px',
                     padding: '24px',
-                    maxHeight: '85vh',
-                    overflowY: 'auto',
+                    marginBottom: '80px', // Bottom spacing
                     boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
                     border: '1px solid var(--border-subtle)',
                 }}
@@ -145,8 +155,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                         />
                     </div>
 
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        <div style={{ flex: '1 1 160px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '14px' }}>START TIME</label>
                             <input
                                 type="time"
@@ -158,14 +168,17 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                     border: theme === 'light' ? '1px solid var(--border-subtle)' : 'none',
                                     borderRadius: '12px',
                                     padding: '16px',
+                                    paddingLeft: '12px', // Tighter for mobile
+                                    paddingRight: '12px', // Tighter for mobile
                                     color: 'var(--text-primary)',
                                     fontSize: '16px',
                                     outline: 'none',
                                     colorScheme: theme === 'light' ? 'light' : 'dark',
+                                    minWidth: 0, // Prevent overflow
                                 }}
                             />
                         </div>
-                        <div style={{ flex: '1 1 160px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '14px' }}>END TIME</label>
                             <input
                                 type="time"
@@ -177,10 +190,13 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                     border: theme === 'light' ? '1px solid var(--border-subtle)' : 'none',
                                     borderRadius: '12px',
                                     padding: '16px',
+                                    paddingLeft: '12px', // Tighter for mobile
+                                    paddingRight: '12px', // Tighter for mobile
                                     color: 'var(--text-primary)',
                                     fontSize: '16px',
                                     outline: 'none',
                                     colorScheme: theme === 'light' ? 'light' : 'dark',
+                                    minWidth: 0, // Prevent overflow
                                 }}
                             />
                         </div>
@@ -191,7 +207,10 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                         <motion.div
                             layout
                             style={{ overflow: 'hidden' }}
-                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                            transition={{ 
+                                duration: 0.6, 
+                                ease: [0.32, 0.72, 0, 1] // Premium Apple-style easing
+                            }}
                         >
                             <div style={{
                                 display: 'grid',
@@ -199,9 +218,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                 gap: '12px',
                                 paddingBottom: '4px'
                             }}>
-                                {ICONS.slice(0, showAllIcons ? undefined : 6).map(icon => (
-                                    <motion.button
-                                        layout
+                                {ICONS.slice(0, 6).map(icon => (
+                                    <button
                                         key={icon}
                                         type="button"
                                         onClick={() => setIconName(icon)}
@@ -220,9 +238,52 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                         }}
                                     >
                                         {React.cloneElement(ICON_MAP[icon] as React.ReactElement<{ size: number }>, { size: 20 })}
-                                    </motion.button>
+                                    </button>
                                 ))}
                             </div>
+                            <AnimatePresence>
+                                {showAllIcons && (
+                                    <motion.div
+                                        key="additional-icons"
+                                        initial={{ opacity: 0, filter: 'blur(10px)', scale: 0.98, height: 0 }}
+                                        animate={{ opacity: 1, filter: 'blur(0px)', scale: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, filter: 'blur(10px)', scale: 0.98, height: 0 }}
+                                        transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                                        style={{ overflow: 'hidden' }}
+                                    >
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
+                                            gap: '12px',
+                                            paddingTop: '12px', // Gap between grids
+                                            paddingBottom: '4px'
+                                        }}>
+                                            {ICONS.slice(6).map(icon => (
+                                                <button
+                                                    key={icon}
+                                                    type="button"
+                                                    onClick={() => setIconName(icon)}
+                                                    style={{
+                                                        width: '44px',
+                                                        height: '44px',
+                                                        borderRadius: '12px',
+                                                        backgroundColor: iconName === icon ? color : (theme === 'light' ? '#ffffff' : 'var(--selection-bg)'),
+                                                        border: iconName === icon ? 'none' : (theme === 'light' ? '1px solid var(--border-subtle)' : 'none'),
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        cursor: 'pointer',
+                                                        transition: 'background-color 0.2s, color 0.2s',
+                                                        color: iconName === icon ? 'white' : 'var(--text-primary)',
+                                                    }}
+                                                >
+                                                    {React.cloneElement(ICON_MAP[icon] as React.ReactElement<{ size: number }>, { size: 20 })}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
                         <button
                             type="button"
@@ -253,7 +314,10 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                         <motion.div
                             layout
                             style={{ overflow: 'hidden' }}
-                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                            transition={{ 
+                                duration: 0.6, 
+                                ease: [0.32, 0.72, 0, 1] 
+                            }}
                         >
                             <div style={{
                                 display: 'grid',
@@ -261,9 +325,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                 gap: '12px',
                                 paddingBottom: '4px'
                             }}>
-                                {COLORS.slice(0, showAllColors ? undefined : 6).map(c => (
-                                    <motion.button
-                                        layout
+                                {COLORS.slice(0, 6).map(c => (
+                                    <button
                                         key={c}
                                         type="button"
                                         onClick={() => setColor(c)}
@@ -279,6 +342,43 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                                     />
                                 ))}
                             </div>
+                            <AnimatePresence>
+                                {showAllColors && (
+                                    <motion.div
+                                        key="additional-colors"
+                                        initial={{ opacity: 0, filter: 'blur(10px)', scale: 0.98, height: 0 }}
+                                        animate={{ opacity: 1, filter: 'blur(0px)', scale: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, filter: 'blur(10px)', scale: 0.98, height: 0 }}
+                                        transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                                        style={{ overflow: 'hidden' }}
+                                    >
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
+                                            gap: '12px',
+                                            paddingTop: '12px',
+                                            paddingBottom: '4px'
+                                        }}>
+                                            {COLORS.slice(6).map(c => (
+                                                <button
+                                                    key={c}
+                                                    type="button"
+                                                    onClick={() => setColor(c)}
+                                                    style={{
+                                                        width: '44px',
+                                                        height: '44px',
+                                                        borderRadius: '50%',
+                                                        backgroundColor: c,
+                                                        border: color === c ? '3px solid var(--text-primary)' : '3px solid transparent',
+                                                        cursor: 'pointer',
+                                                        transition: 'background-color 0.2s, border 0.2s',
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
                         <button
                             type="button"
@@ -326,8 +426,8 @@ const AddEventModal: FC<AddEventModalProps> = ({ isOpen, onClose, onAdd, eventTo
                         Add to Timeline
                     </button>
                 </form>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

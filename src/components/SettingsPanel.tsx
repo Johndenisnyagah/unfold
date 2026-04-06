@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { X, Download, Upload, Trash2, Plus, Play, Bookmark, Sun, Moon } from 'lucide-react';
 import type { TimelineEvent, DailyTemplate } from '../types';
 
 interface SettingsPanelProps {
-    isOpen: boolean;
     onClose: () => void;
     events: TimelineEvent[];
     onImport: (events: TimelineEvent[]) => void;
@@ -21,7 +21,6 @@ interface SettingsPanelProps {
  * Manages daily templates, data export/import, and theme switching.
  */
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
-    isOpen,
     onClose,
     events,
     onImport,
@@ -36,8 +35,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [templateName, setTemplateName] = useState('');
     const [isSavingTemplate, setIsSavingTemplate] = useState(false);
-
-    if (!isOpen) return null;
 
     const handleExport = () => {
         const dataStr = JSON.stringify(events, null, 2);
@@ -80,36 +77,46 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'var(--overlay-bg)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            touchAction: 'none', // Prevent background scrolling
-            overflow: 'hidden',
-        }}>
-            <div style={{
-                backgroundColor: 'var(--card-bg-translucent)',
-                backdropFilter: 'blur(40px)',
-                WebkitBackdropFilter: 'blur(40px)',
-                borderRadius: '24px',
-                padding: '24px',
-                width: 'calc(100% - 40px)', // Precise viewport fit
-                maxWidth: '400px', // More compact, solid feel
-                maxHeight: '85vh',
-                overflowY: 'auto',
-                overflowX: 'hidden', // Stop any horizontal jitter
-                boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
-                border: '1px solid var(--border-subtle)',
-                userSelect: 'none', // Feel more like a native component
-            }}>
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'var(--overlay-bg)',
+                zIndex: 1000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '20px',
+                touchAction: 'none', // Prevent background scrolling
+                overflow: 'hidden',
+                backdropFilter: 'blur(8px)', // Added consistent blur
+            }}
+        >
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                style={{
+                    backgroundColor: 'var(--card-bg-translucent)',
+                    backdropFilter: 'blur(40px)',
+                    WebkitBackdropFilter: 'blur(40px)',
+                    borderRadius: '24px',
+                    padding: '24px',
+                    width: 'calc(100% - 40px)', // Precise viewport fit
+                    maxWidth: '400px', // More compact, solid feel
+                    maxHeight: '85vh',
+                    overflowY: 'auto',
+                    overflowX: 'hidden', // Stop any horizontal jitter
+                    boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+                    border: '1px solid var(--border-subtle)',
+                    userSelect: 'none', // Feel more like a native component
+                }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Settings</h2>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
@@ -389,8 +396,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         </button>
                     </section>
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

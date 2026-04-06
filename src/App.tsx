@@ -417,26 +417,30 @@ function App() {
               </button>
             </div>
 
-            <SettingsPanel
-              isOpen={isSettingsOpen}
-              onClose={() => setIsSettingsOpen(false)}
-              events={events}
-              onImport={handleImportEvents}
-              onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
-              templates={templates}
-              onSaveTemplate={handleSaveTemplate}
-              onApplyTemplate={handleApplyTemplate}
-              onDeleteTemplate={handleDeleteTemplate}
-              theme={theme}
-              onThemeChange={handleThemeChange}
-            />
+            <AnimatePresence>
+              {isSettingsOpen && (
+                <SettingsPanel
+                  onClose={() => setIsSettingsOpen(false)}
+                  events={events}
+                  onImport={handleImportEvents}
+                  onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
+                  templates={templates}
+                  onSaveTemplate={handleSaveTemplate}
+                  onApplyTemplate={handleApplyTemplate}
+                  onDeleteTemplate={handleDeleteTemplate}
+                  theme={theme}
+                  onThemeChange={handleThemeChange}
+                />
+              )}
 
-            <AiPromptModal
-              isOpen={isAiModalOpen}
-              onClose={() => setIsAiModalOpen(false)}
-              onGenerate={handleAiGenerate}
-              isGenerating={isGeneratingAi}
-            />
+              {isAiModalOpen && (
+                <AiPromptModal
+                  onClose={() => setIsAiModalOpen(false)}
+                  onGenerate={handleAiGenerate}
+                  isGenerating={isGeneratingAi}
+                />
+              )}
+            </AnimatePresence>
           </motion.div>
         ) : (
           <motion.div
@@ -574,34 +578,39 @@ function App() {
               </motion.div>
             </div>
 
-            <AddEventModal
-              isOpen={isModalOpen}
-              onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
-              onAdd={handleAddOrUpdateEvent}
-              eventToEdit={editingEvent}
-              theme={theme}
-            />
+            <AnimatePresence>
+              {isModalOpen && (
+                <AddEventModal
+                  onClose={() => { setIsModalOpen(false); setEditingEvent(null); }}
+                  onAdd={handleAddOrUpdateEvent}
+                  eventToEdit={editingEvent}
+                  theme={theme}
+                />
+              )}
 
-            <SettingsPanel
-              isOpen={isSettingsOpen}
-              onClose={() => setIsSettingsOpen(false)}
-              events={events}
-              onImport={handleImportEvents}
-              onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
-              templates={templates}
-              onSaveTemplate={handleSaveTemplate}
-              onApplyTemplate={handleApplyTemplate}
-              onDeleteTemplate={handleDeleteTemplate}
-              theme={theme}
-              onThemeChange={setTheme}
-            />
+              {isSettingsOpen && (
+                <SettingsPanel
+                  onClose={() => setIsSettingsOpen(false)}
+                  events={events}
+                  onImport={handleImportEvents}
+                  onClear={() => setAllEvents(prev => ({ ...prev, [dateKey]: [] }))}
+                  templates={templates}
+                  onSaveTemplate={handleSaveTemplate}
+                  onApplyTemplate={handleApplyTemplate}
+                  onDeleteTemplate={handleDeleteTemplate}
+                  theme={theme}
+                  onThemeChange={setTheme}
+                />
+              )}
 
-            <AiPromptModal
-              isOpen={isAiModalOpen}
-              onClose={() => setIsAiModalOpen(false)}
-              onGenerate={handleAiGenerate}
-              isGenerating={isGeneratingAi}
-            />
+              {isAiModalOpen && (
+                <AiPromptModal
+                  onClose={() => setIsAiModalOpen(false)}
+                  onGenerate={handleAiGenerate}
+                  isGenerating={isGeneratingAi}
+                />
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

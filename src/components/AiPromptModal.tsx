@@ -1,10 +1,9 @@
 import { useState, type FC } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import AiIcon from './AiIcon';
 
 interface AiPromptModalProps {
-    isOpen: boolean;
     onClose: () => void;
     onGenerate: (prompt: string) => Promise<void>;
     isGenerating: boolean;
@@ -14,7 +13,7 @@ interface AiPromptModalProps {
  * Modal component for entering AI prompts.
  * Allows users to describe their day and trigger timeline generation.
  */
-const AiPromptModal: FC<AiPromptModalProps> = ({ isOpen, onClose, onGenerate, isGenerating }) => {
+const AiPromptModal: FC<AiPromptModalProps> = ({ onClose, onGenerate, isGenerating }) => {
     const [prompt, setPrompt] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -25,27 +24,29 @@ const AiPromptModal: FC<AiPromptModalProps> = ({ isOpen, onClose, onGenerate, is
     };
 
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'var(--overlay-bg)',
-                    zIndex: 2000,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '20px',
-                    backdropFilter: 'blur(8px)',
-                }}>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        style={{
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'var(--overlay-bg)',
+                zIndex: 2000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '20px',
+                backdropFilter: 'blur(8px)',
+            }}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                style={{
                             backgroundColor: 'var(--card-bg-translucent)',
                             backdropFilter: 'blur(40px)',
                             WebkitBackdropFilter: 'blur(40px)',
@@ -131,9 +132,7 @@ const AiPromptModal: FC<AiPromptModalProps> = ({ isOpen, onClose, onGenerate, is
                             </button>
                         </form>
                     </motion.div>
-                </div>
-            )}
-        </AnimatePresence>
+        </motion.div>
     );
 };
 
